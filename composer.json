@@ -1,0 +1,19 @@
+{
+    "name": "fpaipl/prody",
+    "description": "Its a product management system for ecomm",
+    "type": "library",
+    "license": "Unlicensed",
+    "autoload": {
+        "psr-4": {
+            "Fpaipl\\Prody\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "PG Softcode",
+            "email": "pg.softcode@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
