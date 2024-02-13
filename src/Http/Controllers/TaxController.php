@@ -5,7 +5,7 @@ namespace Fpaipl\Prody\Http\Controllers;
 use Fpaipl\Prody\Models\Tax;
 use Illuminate\Http\Request;
 use Fpaipl\Panel\Http\Controllers\PanelController;
-use Fpaipl\Prody\DataTables\TaxDatatable as Datatable;
+use Fpaipl\Prody\Datatables\TaxDatatable as Datatable;
 
 class TaxController extends PanelController
 {

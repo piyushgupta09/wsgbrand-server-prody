@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Brand;
 use Fpaipl\Prody\Http\Requests\BrandRequest;
 use Fpaipl\Panel\Http\Controllers\PanelController;
-use Fpaipl\Prody\DataTables\BrandDatatable as Datatable;
+use Fpaipl\Prody\Datatables\BrandDatatable as Datatable;
 
 class BrandController extends PanelController
 {

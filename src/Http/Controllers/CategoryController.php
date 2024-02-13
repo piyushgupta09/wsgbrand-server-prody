@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Category;
 use Fpaipl\Prody\Http\Requests\CategoryRequest;
 use Fpaipl\Panel\Http\Controllers\PanelController;
-use Fpaipl\Prody\DataTables\CategoryDatatable as Datatable;
+use Fpaipl\Prody\Datatables\CategoryDatatable as Datatable;
 
 class CategoryController extends PanelController
 {

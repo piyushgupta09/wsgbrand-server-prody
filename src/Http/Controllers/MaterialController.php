@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Material;
 use Fpaipl\Panel\Http\Controllers\PanelController;
 use Fpaipl\Prody\Http\Requests\MaterialRequest;
-use Fpaipl\Prody\DataTables\MaterialDatatable as Datatable;
+use Fpaipl\Prody\Datatables\MaterialDatatable as Datatable;
 
 class MaterialController extends PanelController
 {

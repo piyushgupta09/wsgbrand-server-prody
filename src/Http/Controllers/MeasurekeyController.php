@@ -5,7 +5,7 @@ namespace Fpaipl\Prody\Http\Controllers;
 use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Measurekey;
 use Fpaipl\Panel\Http\Controllers\PanelController;
-use Fpaipl\Prody\DataTables\MeasurekeyDatatable as Datatable;
+use Fpaipl\Prody\Datatables\MeasurekeyDatatable as Datatable;
 
 class MeasurekeyController extends PanelController
 {

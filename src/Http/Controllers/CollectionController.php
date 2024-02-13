@@ -7,7 +7,7 @@ use Fpaipl\Prody\Models\Collection;
 use Fpaipl\Panel\Http\Controllers\PanelController;
 use Fpaipl\Prody\Http\Requests\CollectionEditRequest;
 use Fpaipl\Prody\Http\Requests\CollectionCreateRequest;
-use Fpaipl\Prody\DataTables\CollectionDatatable as Datatable;
+use Fpaipl\Prody\Datatables\CollectionDatatable as Datatable;
 
 class CollectionController extends PanelController
 {

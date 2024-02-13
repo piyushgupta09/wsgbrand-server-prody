@@ -5,7 +5,7 @@ namespace Fpaipl\Prody\Http\Controllers;
 use Fpaipl\Prody\Models\Unit;
 use Illuminate\Http\Request;
 use Fpaipl\Panel\Http\Controllers\PanelController;
-use Fpaipl\Prody\DataTables\UnitDatatable as Datatable;
+use Fpaipl\Prody\Datatables\UnitDatatable as Datatable;
 
 class UnitController extends PanelController
 {

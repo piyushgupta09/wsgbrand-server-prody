@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Overhead;
 use Fpaipl\Panel\Http\Controllers\PanelController;
-use Fpaipl\Prody\DataTables\OverheadDatatable as Datatable;
+use Fpaipl\Prody\Datatables\OverheadDatatable as Datatable;
 
 class OverheadController extends PanelController
 {

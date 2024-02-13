@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Supplier;
 use Fpaipl\Panel\Http\Controllers\PanelController;
 use Fpaipl\Prody\Http\Requests\SupplierRequest;
-use Fpaipl\Prody\DataTables\SupplierDatatable as Datatable;
+use Fpaipl\Prody\Datatables\SupplierDatatable as Datatable;
 
 class SupplierController extends PanelController
 {

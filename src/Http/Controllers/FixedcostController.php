@@ -5,7 +5,7 @@ namespace Fpaipl\Prody\Http\Controllers;
 use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Fixedcost;
 use Fpaipl\Panel\Http\Controllers\PanelController;
-use Fpaipl\Prody\DataTables\FixedcostDatatable as Datatable;
+use Fpaipl\Prody\Datatables\FixedcostDatatable as Datatable;
 
 class FixedcostController extends PanelController
 {

@@ -5,7 +5,7 @@ namespace Fpaipl\Prody\Http\Controllers;
 use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Attrikey;
 use Fpaipl\Panel\Http\Controllers\PanelController;
-use Fpaipl\Prody\DataTables\AttrikeyDatatable as Datatable;
+use Fpaipl\Prody\Datatables\AttrikeyDatatable as Datatable;
 
 class AttrikeyController extends PanelController
 {
