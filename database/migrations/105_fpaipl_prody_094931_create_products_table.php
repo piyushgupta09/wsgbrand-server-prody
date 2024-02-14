@@ -35,7 +35,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->string('code')->nullable();
+            $table->string('code')->unique();
             $table->longText('details')->nullable();
 
             $table->foreignId('brand_id')->constrained()->onUpdate('cascade')->onDelete('cascade');

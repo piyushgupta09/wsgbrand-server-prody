@@ -10,7 +10,7 @@ class Consumable extends Model
 {
     use Authx;
     
-    protected $fillable = ['name', 'unit', 'rate', 'description'];
+    protected $fillable = ['name', 'unit', 'rate', 'details'];
 
     // Consumables may be linked to multiple products
     public function products()

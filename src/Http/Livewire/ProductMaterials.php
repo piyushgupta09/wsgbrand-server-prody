@@ -99,7 +99,7 @@ class ProductMaterials extends Component
         $newCount = LoadMaterials::execute(
             $selectedSupplier->website, 
             $selectedSupplier->id,
-            true
+            // true
         );
         return redirect()->route('products.show', $this->routeValue)->with('toast', [
             'class' => 'success',

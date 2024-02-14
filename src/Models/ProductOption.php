@@ -28,6 +28,7 @@ class ProductOption extends Model implements HasMedia
 
     const MEDIA_COLLECTION_NAME = 'product_option';
     const MEDIA_CONVERSION_THUMB = 's100';
+    const MEDIA_CONVERSION_CARD = 's300';
     const MEDIA_CONVERSION_PREVIEW = 's400';
     const MEDIA_CONVERSION_BANNER = 's800';
     const MEDIA_CONVERSION_FULL = 's1200';
@@ -87,6 +88,13 @@ class ProductOption extends Model implements HasMedia
             ->format('webp')
             ->width(80)
             ->height(100)
+            ->sharpen(10)
+            ->queued();
+
+        $this->addMediaConversion('s300')
+            ->format('webp')
+            ->width(200)
+            ->height(300)
             ->sharpen(10)
             ->queued();
 

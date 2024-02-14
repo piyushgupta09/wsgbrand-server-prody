@@ -15,8 +15,6 @@ use Fpaipl\Prody\Models\Category;
 use Fpaipl\Prody\Models\Overhead;
 use Fpaipl\Panel\Traits\HasStatus;
 use Fpaipl\Panel\Traits\ManageTag;
-use Fpaipl\Panel\Traits\NamedSlug;
-use Fpaipl\Prody\Models\Attribute;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Fpaipl\Brandy\Models\StockItem;
@@ -38,7 +36,6 @@ use Fpaipl\Prody\Models\ProductMeasurement;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Fpaipl\Prody\Models\Category as ParentModel;
-use Fpaipl\Prody\Http\Livewire\ProductMeasurements;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -60,7 +57,6 @@ class Product extends Model
     use
         Authx,
         LogsActivity,
-        NamedSlug,
         ManageTag,
         HasStatus,
         SoftDeletes,
@@ -69,10 +65,19 @@ class Product extends Model
     const STATUS = ['draft', 'live'];
     const UPDATE_EVENT = 'update_product';
 
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     // static created
     public static function boot()
     {
         parent::boot();
+
+        static::creating(function ($product) {
+            $product->slug = Str::slug($product->name . '-' . $product->code);
+        });
 
         static::created(function ($product) {
             $product->generateDecisions();

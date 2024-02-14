@@ -268,11 +268,11 @@ class OverheadDatatable extends ModelDatatable
                         'note' => 'Capacity at which this overhead is apportioned'
                     ],
                 ],
-                'description' => [
-                    'name' => 'description',
+                'details' => [
+                    'name' => 'details',
                     'labels' => [
-                        'table' => 'Description',
-                        'export' => 'Description'
+                        'table' => 'Details',
+                        'export' => 'Details'
                     ],
                     'thead' => [
                         'view' => 'buttons.sortit',
@@ -308,7 +308,7 @@ class OverheadDatatable extends ModelDatatable
                         'type' => 'textarea',
                         'style' => '',
                         'p_style' => 'col-6',
-                        'placeholder' => 'Description',
+                        'placeholder' => 'Details',
                         'component' => 'forms.textarea-box',
                         'attributes' => ['required'],
                         'rows' => '',

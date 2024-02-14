@@ -66,6 +66,15 @@ class Material extends Model
         }
     }
 
+    // add static created method
+    public static function boot()
+    {
+        parent::boot();
+        static::created(function ($material) {
+            $material->update(['name' => $material->category_name . '-' . $material->name]);
+        });
+    }
+
     public function materialOptions(): HasMany
     {
         return $this->hasMany(MaterialOption::class);

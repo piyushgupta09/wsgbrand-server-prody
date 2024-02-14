@@ -21,7 +21,7 @@ class OverheadController extends PanelController
             'name' => 'required|string|max:255|unique:overheads',
             'amount' => 'required|numeric|min:0',
             'capacity' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
+            'detail' => 'nullable|string',
             'stage' => 'required|string|in:' . implode(',', array_column(config('prody.overhead_stages'), 'id')),
         ]);
 
@@ -30,7 +30,7 @@ class OverheadController extends PanelController
             'amount' => $request->amount,
             'capacity' => $request->capacity,
             'rate' => $request->amount / $request->capacity,
-            'description' => $request->description,
+            'details' => $request->details,
             'stage' => $request->stage,
         ]);
         
@@ -46,7 +46,7 @@ class OverheadController extends PanelController
             'name' => 'required|string|max:255|unique:overheads,name,' . $overhead->id,
             'amount' => 'required|numeric|min:0',
             'capacity' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
+            'details' => 'nullable|string',
             'stage' => 'required|string|in:' . implode(',', array_column(config('prody.overhead_stages'), 'id')),
         ]);
 
@@ -55,7 +55,7 @@ class OverheadController extends PanelController
             'amount' => $request->amount,
             'capacity' => $request->capacity,
             'rate' => $request->amount / $request->capacity,
-            'description' => $request->description,
+            'details' => $request->details,
             'stage' => $request->stage,
         ]);
         

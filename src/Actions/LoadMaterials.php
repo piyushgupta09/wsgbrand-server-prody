@@ -67,7 +67,12 @@ class LoadMaterials
 
         foreach ($responseData as $data) {
 
-            if (!isset($data['sid']) || !isset($data['category_name']) || !isset($data['category_type']) || !isset($data['unit']) || !isset($data['name']) || !isset($data['slug']) || !isset($data['price']) || !isset($data['options']) || !isset($data['ranges'])) {
+            if (!isset($data['sid']) 
+            || !isset($data['category_name']) 
+            || !isset($data['category_type']) 
+            || !isset($data['unit']) || !isset($data['name']) 
+            || !isset($data['slug']) || !isset($data['price']) 
+            || !isset($data['options']) || !isset($data['ranges'])) {
                 if ($debug) {
                     Log::error('LoadMaterialAction error: ', ['error' => 'Invalid material data']);
                 }
@@ -89,8 +94,8 @@ class LoadMaterials
                     'slug' => $data['slug'],
                     'price' => $data['price'],
                     'details' => $data['details'],
-                    'stock' => $data['stock'],
-                    'stockItems' => json_encode($data['stockItems']),
+                    // 'stock' => $data['stock'],
+                    // 'stockItems' => json_encode($data['stockItems']),
                 ],
             );
 

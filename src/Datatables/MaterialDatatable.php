@@ -215,15 +215,15 @@ class MaterialDatatable extends ModelDatatable
                         'active' => false,
                         'trash' => false
                     ],
-                    'sortable' => true,
+                    'sortable' => false,
                     'filterable' => [
-                        'active' => true,
-                        'trash' => true
+                        'active' => false,
+                        'trash' => false
                     ],
-                    'importable' => true,
+                    'importable' => false,
                     'exportable' => [
-                        'active' => true,
-                        'trash' => true,
+                        'active' => false,
+                        'trash' => false,
                         'value' => 'getValue'
                     ],
                     'artificial' => false,

@@ -11,7 +11,7 @@ class Overhead extends Model
 {
     use Authx;
        
-    protected $fillable = ['stage', 'name', 'amount', 'capacity', 'rate', 'description'];
+    protected $fillable = ['stage', 'name', 'amount', 'capacity', 'rate', 'details'];
 
 
     public static function validationRules($id = null)
@@ -29,7 +29,7 @@ class Overhead extends Model
             ],
             'amount' => 'required|numeric|min:0',
             'capacity' => 'required|numeric|min:0',
-            'description' => 'required|string',
+            'details' => 'required|string',
         ];
     }
     

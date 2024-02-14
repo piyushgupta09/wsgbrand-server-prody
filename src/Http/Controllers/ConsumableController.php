@@ -24,7 +24,7 @@ class ConsumableController extends PanelController
             'name' => 'required|string|max:255|unique:consumables',
             'unit' => 'required|string|min:1',
             'rate' => 'nullable|numeric|min:1',
-            'description' => 'nullable|string',
+            'details' => 'nullable|string',
         ]);
 
         if (!isset($validated['rate'])) {
@@ -45,7 +45,7 @@ class ConsumableController extends PanelController
             'name' => 'required|string|max:255',
             'unit' => 'required|string|min:1',
             'rate' => 'nullable|numeric|min:1',
-            'description' => 'nullable|string',
+            'details' => 'nullable|string',
         ]);
         
         $consumable->update($validated);

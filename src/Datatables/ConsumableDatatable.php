@@ -246,14 +246,14 @@ class ConsumableDatatable extends ModelDatatable
                     'exportable' => [
                         'active' => true,
                         'trash' => true,
-                        'value' => 'getValue'
+                        'value' => 'getTableData'
                     ],
                     'artificial' => false,
                     'fillable' => [
                         'type' => 'textarea',
                         'style' => '',
                         'p_style' => 'col-6',
-                        'placeholder' => 'Description',
+                        'placeholder' => 'details',
                         'component' => 'forms.textarea-box',
                         'attributes' => [],
                         'rows' => '',

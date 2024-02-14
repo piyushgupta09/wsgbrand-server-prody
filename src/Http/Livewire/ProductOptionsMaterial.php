@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Fpaipl\Prody\Models\Pomo;
 use Livewire\WithFileUploads;
 use Fpaipl\Prody\Models\Product;
+use Fpaipl\Prody\Models\Material;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Fpaipl\Prody\Models\ProductOption;
@@ -168,8 +169,11 @@ class ProductOptionsMaterial extends Component
                         'code' => $this->productOptionCode,
                     ]
                 );
-           
+
+                // $materialProductId = Material::find($materialId)->productMaterials->first()->id;
+                // dump($materialProductId);
                 $productMaterialId = $materialOption->material->productMaterials->where('product_id', $this->product->id)->first()->id;
+                // dd($productMaterialId);
 
                 // Attach the MaterialOption to the ProductOption with the grade
                 Pomo::updateOrCreate(
@@ -180,13 +184,20 @@ class ProductOptionsMaterial extends Component
                         'grade' => $grade,
                     ]
                 );
-
+  
                 // Attach the uploaded images to the new product option
                 foreach ($this->productOptionImages as $image) {
+                    if (!$image->isValid() || !$image->getRealPath()) {
+                        Log::error("Invalid image or path.", ['path' => $image->getPathname()]);
+                        continue; // Skip this iteration if the image path is not valid
+                    }
+                
                     try {
                         $productOption->addMedia($image->getRealPath())->toMediaCollection(ProductOption::MEDIA_COLLECTION_NAME);
                     } catch (\Throwable $th) {
-                        throw new \Exception("Unable to add image");
+                        // Log the specific error message for debugging
+                        Log::error("Unable to add image to media collection.", ['error' => $th->getMessage()]);
+                        throw new \Exception("Unable to add image: " . $th->getMessage());
                     }
                 }
             }
