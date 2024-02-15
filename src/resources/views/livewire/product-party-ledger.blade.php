@@ -11,16 +11,11 @@
                     @include('panel::includes.select-option-card', [
                         'selectedParty' => $ledgerParty,
                     ])
-                    {{-- <div class="bg-light h-100">
-                        <button class="btn btn-danger h-100 border-0 rounded-0" wire:click="removeParty">
-                            <i class="bi bi-x-lg px-2"></i>
-                        </button>
-                    </div> --}}
                 </div>
             @else
                 <div class="col-12" style="z-index: 10000000;">
                     <livewire:add-search-select 
-                        :datalist="$parties" 
+                        :datalist="$parties" label="Search for {{ $model->productDecisions->factory ? 'fabricators' : 'vendors' }} ..."
                         :modelCreateRoute="'parties.create'"    
                     />
                 </div>
@@ -52,9 +47,9 @@
                 <div class="form-floating">
                     <input type="number" id="inputFabRate" class="form-control" wire:model.lazy="fab_rate" required>
                     <label for="inputFabRate" class="font-quick text-dark font-normal">
-                        @if ($model->factory)
+                        @if ($model->productDecisions->factory)
                             Fab Rate (₹ /pc)
-                        @elseif ($model->vendor)
+                        @elseif ($model->productDecisions->vendor)
                             Buy Rate (₹ /pc)
                         @endif
                     </label>
@@ -63,6 +58,21 @@
                     @enderror
                 </div>
             </div>
+
+            {{-- @if ($ledgerManager)
+                <div class="d-flex justify-content-between">
+                    @include('panel::includes.select-option-card', [
+                        'selectedManager' => $ledgerManager,
+                    ])
+                </div>
+            @else
+                <div class="col-12 mb-3" style="z-index: 10000000;">
+                    <livewire:add-search-select 
+                        :datalist="$managers" label="Search for managers ..."
+                        :modelCreateRoute="'employees.create'"    
+                    />
+                </div>
+            @endif --}}
 
             <div class="col-12 mb-3">
                 <div class="form-floating">

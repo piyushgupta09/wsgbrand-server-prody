@@ -34,13 +34,19 @@ class ProductCostsheetPreview extends Component
     public function calculateTotalMaterialCost()
     {
         $this->totalMaterialCost = 0;
-        foreach ($this->productMaterials as $productMaterial) {
-            // Ensure $productMaterial->product and $productMaterial->product->pomrs are not null
-            $pomrs = optional($productMaterial->product)->pomrs;
-            $pomr = $pomrs ? $pomrs->where('product_material_id', $productMaterial->id)->first() : null;
-            if ($pomr) {
-                $this->totalMaterialCost += ($pomr->quantity ?? 0) * ($pomr->cost ?? 0);
+        
+        // check if productDeccision->factory then get the factory materials
+        if ($this->product->productDecisions->factory) {
+            foreach ($this->productMaterials as $productMaterial) {
+                // Ensure $productMaterial->product and $productMaterial->product->pomrs are not null
+                $pomrs = optional($productMaterial->product)->pomrs;
+                $pomr = $pomrs ? $pomrs->where('product_material_id', $productMaterial->id)->first() : null;
+                if ($pomr) {
+                    $this->totalMaterialCost += ($pomr->quantity ?? 0) * ($pomr->cost ?? 0);
+                }
             }
+        } else {
+            $this->totalMaterialCost = $this->product->productRanges->sum('cost') / $this->product->productRanges->count();
         }
     }
     
@@ -59,7 +65,6 @@ class ProductCostsheetPreview extends Component
         }
     }
     
-
     public function printout()
     {
         $this->dispatchBrowserEvent('print-costsheet');

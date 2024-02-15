@@ -1,7 +1,8 @@
 <?php
   
 namespace Fpaipl\Prody\Http\Livewire;
-  
+
+use Fpaipl\Brandy\Models\Employee;
 use Livewire\Component;
 use Fpaipl\Brandy\Models\Party;
 use Fpaipl\Brandy\Models\Ledger;
@@ -12,16 +13,18 @@ class ProductPartyLedger extends Component
     public $modelId;
     public $model;
     public $parties;
+    public $managers;
     public $ledgers;
 
-    // edit
     public $ledgerId;
     public $ledgerParty;
+    public $ledgerManager;
 
     public $min_qty;
     public $max_qty;
     public $fab_rate;
     public $party_id;
+    public $manager_id;
     public $notes;
     
     public $showForm;
@@ -35,6 +38,11 @@ class ProductPartyLedger extends Component
         $this->party_id = $partyId;
     }
 
+    public function selectedManager($managerId)
+    {
+        $this->manager_id = $managerId;
+    }
+
     public function mount($modelId)
     {
         $this->showForm = config('prody.show_add_form');
@@ -42,11 +50,17 @@ class ProductPartyLedger extends Component
         $this->model = Product::find($modelId);
         $this->routeValue = ['product' => $this->model->slug, 'section' => 'parties'];
 
+        // get those employees who ->user has role for manager-brand
+        $this->managers = Employee::whereHas('user', function ($query) {
+            $query->whereHas('roles', function ($query) {
+                $query->where('name', 'manager-brand');
+            });
+        })->active()->get();
         if ($this->model->productDecisions->factory) {
             $this->fab_rate = 20;
             $this->parties = Party::where('type', Party::PRODUCT_FATORY)->active()->get();
         } else if ($this->model->productDecisions->vendor) {
-            $this->fab_rate = 200;
+            $this->fab_rate = $this->model->productRanges->first()->cost;
             $this->parties = Party::where('type', Party::PRODUCT_VENDOR)->active()->get();
         } else {
             $this->parties = collect();

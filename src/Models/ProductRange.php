@@ -21,6 +21,7 @@ class ProductRange extends Model
         'name',
         'slug',
         'mrp',
+        'cost',
         'rate',
         'active',
         'product_id',

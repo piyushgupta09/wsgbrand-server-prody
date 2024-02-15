@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class ProductDatatable extends ModelDatatable
 {
-    const SORT_SELECT_DEFAULT = 'created_at#desc';
+    const SORT_SELECT_DEFAULT = 'updated_at#desc';
     
     public static function baseQuery($model): Builder
     {
@@ -392,6 +392,46 @@ class ProductDatatable extends ModelDatatable
                     ],
                     
     
+                ],
+
+                'status' => [
+                    'name' => 'status',
+                    'labels' => [
+                        'table' => 'Status',
+                        'export' => 'Status'
+                    ],
+    
+                    'thead' => [
+                        'view' => 'buttons.sortit',
+                        'value' => '',
+                        'align' => '',
+                    ],
+                    'tbody' => [
+                        'view' => 'cells.text-value',
+                        'value' => 'getTableData',
+                        'align' => '',
+                    ],
+                    'viewable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'expandable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'sortable' => true,
+                    'filterable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'importable' => true,
+                    'exportable' => [
+                        'active' => true,
+                        'trash' => true,
+                        'value' => 'getTableData'
+                    ],
+                    'artificial' => true,
+                    'fillable' => [],
                 ],
             ),
             parent::getDefaultSlugColumns(),

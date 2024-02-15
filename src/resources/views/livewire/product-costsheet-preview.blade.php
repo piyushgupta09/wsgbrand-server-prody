@@ -4,6 +4,8 @@
             <h3 class="modal-title fs-5" id="previewCostsheetLabel">
                 #{{ $product->code }} - <span class="text-bg-success px-2 py-1">₹ {{ number_format($totalCost) }}/pc</span>
             </h3>
+            <div class="fw-bold fs-5">{{ $product->productDecisions->factory ? 'Factory Product' : 'Vendor Product' }}</div>
+
             <div class="d-flex align-items-center">
                 <button type="button" class="btn lh-1" wire:click="printout">
                     <i class="bi bi-printer fs-5"></i>
@@ -79,8 +81,13 @@
                 </tfoot>
             </table>
 
-             {{-- Overhead Cost --}}
-             <table class="table table-borderless mb-4">
+            {{-- Overhead Cost --}}
+            @if ($overheads->isEmpty())
+                <div class="alert alert-secondary rounded-0 py-2" role="alert">
+                    No Overhead Cost Found!
+                </div>
+            @else
+                <table class="table table-borderless mb-4">
                 <thead class="table-dark">
                     <tr>
                         <th class="ps-3 text-start" style="width: 50px">#</th>
@@ -110,40 +117,47 @@
                         <th class="pe-3 text-end">₹ {{ number_format($overheads->sum('amount')) }}</th>
                     </tr> 
                 </tfoot>
-            </table>
+                </table>
+            @endif
 
             {{-- Consumable Cost --}}
-            <table class="table table-borderless mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="ps-3 text-start" style="width: 50px">#</th>
-                        <th class="text-start">Consumable</th>
-                        <th class="text-start">Description</th>
-                        <th class="text-end">Rate</th>
-                        <th class="text-end">Consumption</th>
-                        <th class="pe-3 text-end">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($consumables as $productConsumable)
-                    <tr>
-                        <td class="ps-3 text-start">{{ $loop->iteration }}</td>
-                        <td class="text-start">{{ $productConsumable->consumable->name }}</td>
-                        <td class="text-start">{{ $productConsumable->consumable->description }}</td>
-                        <td class="text-end">{{ $productConsumable->rate }}/{{ $productConsumable->consumable->unit }}</td>
-                        <td class="text-end">{{ $productConsumable->ratio }}</td>
-                        <td class="pe-3 text-end">{{ number_format($productConsumable->amount) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-                <tfoot class="table-secondary">
-                    <tr>
-                        <th class="ps-3 text-start">D.</th>
-                        <th class="text-start" colspan="4">Total Consumable Cost</th>
-                        <th class="pe-3 text-end">₹ {{ number_format($consumables->sum('amount')) }}</th>
-                    </tr> 
-                </tfoot>
-            </table>
+            @if ($overheads->isEmpty())
+                <div class="alert alert-secondary rounded-0 py-2" role="alert">
+                    No Consumable Cost Found!
+                </div>
+            @else
+                <table class="table table-borderless mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="ps-3 text-start" style="width: 50px">#</th>
+                            <th class="text-start">Consumable</th>
+                            <th class="text-start">Description</th>
+                            <th class="text-end">Rate</th>
+                            <th class="text-end">Consumption</th>
+                            <th class="pe-3 text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($consumables as $productConsumable)
+                        <tr>
+                            <td class="ps-3 text-start">{{ $loop->iteration }}</td>
+                            <td class="text-start">{{ $productConsumable->consumable->name }}</td>
+                            <td class="text-start">{{ $productConsumable->consumable->description }}</td>
+                            <td class="text-end">{{ $productConsumable->rate }}/{{ $productConsumable->consumable->unit }}</td>
+                            <td class="text-end">{{ $productConsumable->ratio }}</td>
+                            <td class="pe-3 text-end">{{ number_format($productConsumable->amount) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot class="table-secondary">
+                        <tr>
+                            <th class="ps-3 text-start">D.</th>
+                            <th class="text-start" colspan="4">Total Consumable Cost</th>
+                            <th class="pe-3 text-end">₹ {{ number_format($consumables->sum('amount')) }}</th>
+                        </tr> 
+                    </tfoot>
+                </table>
+            @endif
 
         </div>
     </div>

@@ -22,6 +22,7 @@ class ProductRanges extends Component
     public $rangeType; // selected size range
     public $rangeMrp;
     public $rangeRate;
+    public $rangeCost;
 
     public $productRanges;
 
@@ -46,6 +47,7 @@ class ProductRanges extends Component
         $this->rangeType = 'free-size';
         $this->formType = 'create';
         $this->rangeMrp = null;
+        $this->rangeCost = null;
         $this->rangeRate = null;
         $this->reloadData();
     }
@@ -74,9 +76,20 @@ class ProductRanges extends Component
             // Step 1: Validate basic fields
             $validatedData = $this->validate([
                 'rangeType' => ['required', Rule::in(array_keys($this->ranges))],
-                'rangeMrp' => ['required', 'numeric'],
+                'rangeMrp' => ['nullable', 'numeric'],
+                'rangeCost' => ['nullable', 'numeric'],
                 'rangeRate' => ['required', 'numeric'],
             ]);
+
+            // if rangeMrp is not provided, set it to rangeRate
+            if (!$validatedData['rangeMrp']) {
+                $validatedData['rangeMrp'] = $validatedData['rangeRate'];
+            }
+
+            // if rangeCost is not provided, set it to rangeRate
+            if (!$validatedData['rangeCost']) {
+                $validatedData['rangeCost'] = $validatedData['rangeRate'];
+            }
 
             // replace - with space and capitalize the first letter of each word
             $productRangeName = Str::title(str_replace('-', ' ', $validatedData['rangeType']));
@@ -89,6 +102,7 @@ class ProductRanges extends Component
                 ],
                 [
                     'mrp' => $validatedData['rangeMrp'],
+                    'cost' => $validatedData['rangeCost'],
                     'rate' => $validatedData['rangeRate']
                 ]
             );
@@ -146,6 +160,7 @@ class ProductRanges extends Component
         // Populate the form fields with the existing data
         $this->rangeType = Str::slug($productRange->name, '-');
         $this->rangeMrp = $productRange->mrp;
+        $this->rangeCost = $productRange->cost;
         $this->rangeRate = $productRange->rate;
 
         // Change the form type to edit
@@ -163,6 +178,7 @@ class ProductRanges extends Component
             $validatedData = $this->validate([
                 'rangeType' => ['required', Rule::in(array_keys($this->ranges))],
                 'rangeMrp' => ['required', 'numeric'],
+                'rangeCost' => ['required', 'numeric'],
                 'rangeRate' => ['required', 'numeric'],
             ]);
 
@@ -172,6 +188,7 @@ class ProductRanges extends Component
             $productRange->update([
                 'name' => $productRangeName,
                 'mrp' => $validatedData['rangeMrp'],
+                'cost' => $validatedData['rangeCost'],
                 'rate' => $validatedData['rangeRate']
             ]);
 
@@ -233,6 +250,7 @@ class ProductRanges extends Component
         $this->rangeType = Str::slug($productRange->name, '-');
         $this->rangeMrp = $productRange->mrp;
         $this->rangeRate = $productRange->rate;
+        $this->rangeCost = $productRange->cost;
 
         // Set form type and other UI properties for creating a new range
         $this->formType = 'create';

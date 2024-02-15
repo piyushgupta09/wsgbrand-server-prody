@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class OverheadDatatable extends ModelDatatable
 {
-    const SORT_SELECT_DEFAULT = 'name#asc';
+    const SORT_SELECT_DEFAULT = 'updated_at#desc';
     
     const DUPLICATE = true;
     const DELETE = true;
@@ -174,6 +174,44 @@ class OverheadDatatable extends ModelDatatable
     
     
                 ],
+                'rate' => [
+                    'name' => 'rate',
+                    'labels' => [
+                        'table' => 'Rate',
+                        'export' => 'Rate'
+                    ],
+                    'thead' => [
+                        'view' => 'buttons.sortit',
+                        'value' => '',
+                        'align' => '',
+                    ],
+                    'tbody' => [
+                        'view' => 'cells.text-value',
+                        'value' => '',
+                        'align' => '',
+                    ],
+                    'viewable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'expandable' => [
+                        'active' => false,
+                        'trash' => false
+                    ],
+                    'sortable' => true,
+                    'filterable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'importable' => true,
+                    'exportable' => [
+                        'active' => true,
+                        'trash' => true,
+                        'value' => 'getTableValue'
+                    ],
+                    'artificial' => true,
+                    'fillable' => [],
+                ], 
                 'amount' => [
                     'name' => 'amount',
                     'labels' => [

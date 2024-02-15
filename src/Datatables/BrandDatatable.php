@@ -9,7 +9,7 @@ use Fpaipl\Panel\Datatables\ModelDatatable;
 
 class BrandDatatable extends ModelDatatable
 {
-    const SORT_SELECT_DEFAULT = 'name#asc';
+    const SORT_SELECT_DEFAULT = 'updated_at#desc';
        
     public static function baseQuery($model): Builder
     {

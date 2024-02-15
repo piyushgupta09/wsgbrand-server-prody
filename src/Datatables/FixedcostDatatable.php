@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class FixedcostDatatable extends ModelDatatable
 {
-    const SORT_SELECT_DEFAULT = 'name#asc';
+    const SORT_SELECT_DEFAULT = 'updated_at#desc';
     
     // const DUPLICATE = true;
     // const DELETE = true;

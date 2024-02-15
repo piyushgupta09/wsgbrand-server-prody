@@ -133,15 +133,15 @@ class ProductOptionsMaterial extends Component
 
             // Start transaction
             DB::beginTransaction();
-
+            
             // Loop through productOptions array
-            foreach ($this->productOptions as $key => $optionData) {
+            foreach ($this->productOptions as $key => $materialOptionId) {
 
                 // Extract material ID and grade from the key
                 [$materialId, $grade] = explode('-', $key);
 
                 // Validate the material option ID
-                $validator = Validator::make($optionData, [
+                $validator = Validator::make($materialOptionId, [
                     'id' => ['required', 'integer', 'exists:material_options,id'],
                 ]);
 
@@ -151,7 +151,7 @@ class ProductOptionsMaterial extends Component
                 }
 
                 // Find MaterialOption
-                $materialOption = MaterialOption::find($optionData['id']);
+                $materialOption = MaterialOption::find($materialOptionId['id']);
 
                 // Check if materialOption is not found
                 if (!$materialOption) {
@@ -170,10 +170,13 @@ class ProductOptionsMaterial extends Component
                     ]
                 );
 
-                // $materialProductId = Material::find($materialId)->productMaterials->first()->id;
-                // dump($materialProductId);
-                $productMaterialId = $materialOption->material->productMaterials->where('product_id', $this->product->id)->first()->id;
-                // dd($productMaterialId);
+                // Extract those ProductMaterial which has same material_id as the currect material_option has
+                $productMaterials = $materialOption->material->productMaterials;
+                // Alternative way to get productMaterials
+                // $productMaterials = Material::find($materialId)->productMaterials;
+
+                // Now from those productMaterials, extract the one which has same product_id as the current product has
+                $productMaterialId = $productMaterials->where('product_id', $this->product->id)->first()->id;
 
                 // Attach the MaterialOption to the ProductOption with the grade
                 Pomo::updateOrCreate(
@@ -186,16 +189,18 @@ class ProductOptionsMaterial extends Component
                 );
   
                 // Attach the uploaded images to the new product option
+                // Assuming $this->productOptionImages holds the Livewire uploaded files
                 foreach ($this->productOptionImages as $image) {
-                    if (!$image->isValid() || !$image->getRealPath()) {
-                        Log::error("Invalid image or path.", ['path' => $image->getPathname()]);
-                        continue; // Skip this iteration if the image path is not valid
-                    }
-                
+                    // Store the image in the correct directory and get the path
+                    $path = $image->storePublicly('public/temp', 'local'); // Adjusted to use the 'public/temp' directory explicitly
+
+                    // Generate the full path for addMedia
+                    $fullPath = storage_path('app/'.$path);
+    
                     try {
-                        $productOption->addMedia($image->getRealPath())->toMediaCollection(ProductOption::MEDIA_COLLECTION_NAME);
+                        // Use the full path to attach the image to the media collection
+                        $productOption->addMedia($fullPath)->toMediaCollection(ProductOption::MEDIA_COLLECTION_NAME);
                     } catch (\Throwable $th) {
-                        // Log the specific error message for debugging
                         Log::error("Unable to add image to media collection.", ['error' => $th->getMessage()]);
                         throw new \Exception("Unable to add image: " . $th->getMessage());
                     }

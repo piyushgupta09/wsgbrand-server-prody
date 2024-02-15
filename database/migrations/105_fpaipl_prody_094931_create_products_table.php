@@ -99,6 +99,7 @@ return new class extends Migration
             $table->string('name'); // Small
             $table->string('slug'); // small
             $table->decimal('mrp', $precision = 8, $scale = 2)->default(0.00);
+            $table->decimal('cost', $precision = 8, $scale = 2)->default(0.00);
             $table->decimal('rate', $precision = 8, $scale = 2)->default(0.00);
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->unique(['product_id', 'slug']); // each product can have only one small size

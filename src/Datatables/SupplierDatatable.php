@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class SupplierDatatable extends ModelDatatable
 {
-    const SORT_SELECT_DEFAULT = 'name#asc';
+    const SORT_SELECT_DEFAULT = 'updated_at#desc';
 
     public static function baseQuery($model): Builder
     {

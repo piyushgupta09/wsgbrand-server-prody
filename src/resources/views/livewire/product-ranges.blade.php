@@ -18,7 +18,7 @@
                 </p>
 
                 {{-- Select Range Type --}}
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <div class="form-floating">
                         <select class="form-select" id="productRangeType" wire:model="rangeType" required
                             aria-label="Choose range type">
@@ -34,10 +34,23 @@
                     </div>
                 </div>
 
-                {{-- Product Range Mrp --}}
-                <div class="col-md-4 mb-3">
+                {{-- Product Range Cost --}}
+                <div class="col-md-3 mb-3">
                     <div class="form-floating">
-                        <input type="text" id="productRangeMrp" class="form-control" wire:model="rangeMrp" required>
+                        <input type="text" id="productRangeCost" class="form-control" wire:model="rangeCost">
+                        <label for="productRangeCost" class="font-quick text-dark font-normal">
+                            Buying Rate (cost)
+                        </label>
+                        @error('rangeCost')
+                        <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Product Range Mrp --}}
+                <div class="col-md-3 mb-3">
+                    <div class="form-floating">
+                        <input type="text" id="productRangeMrp" class="form-control" wire:model="rangeMrp">
                         <label for="productRangeMrp" class="font-quick text-dark font-normal">
                             Market Rate (mrp)
                         </label>
@@ -48,11 +61,11 @@
                 </div>
 
                 {{-- Product Range Rate --}}
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <div class="form-floating">
                         <input type="text" id="productRangeRate" class="form-control" wire:model="rangeRate" required>
                         <label for="productRangeRate" class="font-quick text-dark font-normal">
-                            Selling Rate (rate)
+                            Selling Rate (payable)
                         </label>
                         @error('rangeRate')
                         <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
