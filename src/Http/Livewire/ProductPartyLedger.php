@@ -20,11 +20,13 @@ class ProductPartyLedger extends Component
     public $ledgerParty;
     public $ledgerManager;
 
+    public $fee_rate;
+    public $order_cap;
     public $min_qty;
     public $max_qty;
     public $fab_rate;
-    public $party_id;
-    public $manager_id;
+    public $party_id; // selected party
+    public $manager_id; // selected manager
     public $notes;
     
     public $showForm;
@@ -36,11 +38,6 @@ class ProductPartyLedger extends Component
     public function selectedParty($partyId)
     {
         $this->party_id = $partyId;
-    }
-
-    public function selectedManager($managerId)
-    {
-        $this->manager_id = $managerId;
     }
 
     public function mount($modelId)
@@ -80,9 +77,13 @@ class ProductPartyLedger extends Component
         $this->formType = 'create';
         $this->ledgerId = null;
         $this->ledgerParty = null;
+        $this->ledgerManager = null;
         $this->min_qty = 100;
         $this->max_qty = 1000;
+        $this->fee_rate = 1;
+        $this->order_cap = 1000;
         $this->party_id = null;
+        $this->manager_id = $this->managers->first()?->id;
         $this->notes = null;
         $this->reloadData();
     }
@@ -100,9 +101,12 @@ class ProductPartyLedger extends Component
     public function store()
     {
         $this->validate([
+            'manager_id' => 'required|exists:employees,id',
             'party_id' => 'required|exists:parties,id',
             'min_qty' => 'required|numeric',
             'max_qty' => 'required|numeric',
+            'fee_rate' => 'required|numeric',
+            'order_cap' => 'required|numeric',
             'fab_rate' => 'required|numeric',
             'notes' => 'nullable|string|max:255',
         ]);
@@ -126,10 +130,13 @@ class ProductPartyLedger extends Component
                 $ledger->restore();
             } 
             $ledger->update([
+                'fee_rate' => $this->fee_rate,
+                'order_cap' => $this->order_cap,
                 'min_qty' => $this->min_qty,
                 'max_qty' => $this->max_qty,
                 'fab_rate' => $this->fab_rate,
                 'notes' => $this->notes ?? '',
+                'employee_id' => $this->manager_id,
             ]);
 
             return redirect()->route('products.show', $this->routeValue)->with('toast', [
@@ -139,7 +146,10 @@ class ProductPartyLedger extends Component
         }
 
         $this->model->ledgers()->create([
+            'employee_id' => $this->manager_id,
             'party_id' => $this->party_id,
+            'fee_rate' => $this->fee_rate,
+            'order_cap' => $this->order_cap,
             'min_qty' => $this->min_qty,
             'max_qty' => $this->max_qty,
             'fab_rate' => $this->fab_rate,
@@ -160,9 +170,12 @@ class ProductPartyLedger extends Component
         // Find the product option with associated pomos
         $ledger = Ledger::find($ledgerId);
         $this->ledgerId = $ledgerId;
+        $this->ledgerManager = $ledger->manager;
         $this->ledgerParty = $ledger->party;
         $this->min_qty = $ledger->min_qty;
         $this->max_qty = $ledger->max_qty;
+        $this->fee_rate = $ledger->fee_rate;
+        $this->order_cap = $ledger->order_cap;
         $this->fab_rate = $ledger->fab_rate;
         $this->party_id = $ledger->party_id;
         $this->notes = $ledger->notes;
@@ -173,24 +186,37 @@ class ProductPartyLedger extends Component
     public function update()
     {
         $this->validate([
+            'fee_rate' => 'required|numeric',
+            'order_cap' => 'required|numeric',
             'min_qty' => 'required|numeric',
             'max_qty' => 'required|numeric',
             'fab_rate' => 'required|numeric',
             'notes' => 'nullable|string|max:255',
+            'manager_id' => 'required|exists:employees,id',
         ]);
 
-        $ledger = Ledger::find($this->ledgerId);
-        $ledger->update([
-            'min_qty' => $this->min_qty,
-            'max_qty' => $this->max_qty,
-            'fab_rate' => $this->fab_rate,
-            'notes' => $this->notes,
-        ]);
+        try {
+            $ledger = Ledger::find($this->ledgerId);
+            $ledger->update([
+                'fee_rate' => $this->fee_rate,
+                'order_cap' => $this->order_cap,
+                'min_qty' => $this->min_qty,
+                'max_qty' => $this->max_qty,
+                'fab_rate' => $this->fab_rate,
+                'notes' => $this->notes,
+                'employee_id' => $this->manager_id,
+            ]);
+            return redirect()->route('products.show', $this->routeValue)->with('toast', [
+                'class' => 'success',
+                'text' => 'Party Ledger updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('products.show', $this->routeValue)->with('toast', [
+                'class' => 'danger',
+                'text' => 'Party Ledger could not be updated.',
+            ]);
+        }
 
-        return redirect()->route('products.show', $this->routeValue)->with('toast', [
-            'class' => 'success',
-            'text' => 'Party Ledger updated successfully.',
-        ]);
     }
 
     public function removeParty()

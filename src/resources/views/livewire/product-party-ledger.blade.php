@@ -1,10 +1,18 @@
-<div class="card border-0">
+<div class="card border-0 font-title">
 
     @include('prody::includes.form-toggle-button')
 
     <div x-data="{ show: @entangle('showForm') }" x-show="show" x-transition.delay.100ms class="card-body p-0 text-bg-secondary">
 
         <div class="row m-0 py-3">
+
+            {{-- Party --}}
+
+            <div class="col-12 ps-0">
+                <div class="text-bg-light fw-500 w-fc px-2 py-1 mb-3 br-end">
+                    1. Select Party for Ledger
+                </div>
+            </div>
 
             @if ($ledgerParty)
                 <div class="d-flex justify-content-between">
@@ -23,26 +31,27 @@
 
             <div class="my-2"></div>
 
+            {{-- Min --}}
             <div class="col-md-4 mb-3">
                 <div class="form-floating">
                     <input type="number" id="inputMinQuantity" class="form-control" wire:model.lazy="min_qty" required>
-                    <label for="inputMinQuantity" class="font-quick text-dark font-normal">Min Quantity</label>
+                    <label for="inputMinQuantity" class="font-quick text-dark font-normal">Min Order Quantity</label>
                     @error('min_qty')
                         <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
-
+            {{-- Max --}}
             <div class="col-md-4 mb-3">
                 <div class="form-floating">
                     <input type="number" id="inputMaxQuantity" class="form-control" wire:model.lazy="max_qty" required>
-                    <label for="inputMaxQuantity" class="font-quick text-dark font-normal">Max Quantity</label>
+                    <label for="inputMaxQuantity" class="font-quick text-dark font-normal">Max Order Quantity</label>
                     @error('max_qty')
                         <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
-
+            {{-- Buy Rate --}}
             <div class="col-md-4 mb-3">
                 <div class="form-floating">
                     <input type="number" id="inputFabRate" class="form-control" wire:model.lazy="fab_rate" required>
@@ -59,21 +68,56 @@
                 </div>
             </div>
 
-            {{-- @if ($ledgerManager)
-                <div class="d-flex justify-content-between">
-                    @include('panel::includes.select-option-card', [
-                        'selectedManager' => $ledgerManager,
-                    ])
-                </div>
-            @else
-                <div class="col-12 mb-3" style="z-index: 10000000;">
-                    <livewire:add-search-select 
-                        :datalist="$managers" label="Search for managers ..."
-                        :modelCreateRoute="'employees.create'"    
-                    />
-                </div>
-            @endif --}}
 
+            {{-- Manager --}}
+
+            <div class="col-12 ps-0">
+                <div class="text-bg-light fw-500 w-fc px-2 py-1 mb-3 br-end">
+                    2. Select Manager for Ledger
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                @if ($managers->isEmpty())
+                    <div class="alert alert-warning py-2">
+                        No manager available
+                    </div>
+                @else
+                    <div class="form-floating">
+                        <select class="form-select" id="floatingSelectLedgerManager" 
+                            wire:model.lazy="manager_id"
+                            aria-label="Choose ledger manager from list of available managers">
+                            <option value="">Select Manager</option>
+                            @foreach ($managers as $manager)
+                                <option value="{{ $manager->id }}">{{ $manager->name }}</option>
+                            @endforeach
+                        </select>
+                        <label for="floatingSelectLedgerManager">Select Ledger Manager</label>
+                    </div>                
+                @endif
+            </div>
+            {{-- Order Cap --}}
+            <div class="col-md-4 mb-3">
+                <div class="form-floating">
+                    <input type="number" id="inputOrderCapacity" class="form-control" wire:model.lazy="order_cap" required>
+                    <label for="inputOrderCapacity" class="font-quick text-dark font-normal">Max Order Cap</label>
+                    @error('order_cap')
+                        <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+            {{-- Commision Rate --}}
+            <div class="col-md-4 mb-3">
+                <div class="form-floating">
+                    <input type="number" id="inputFeePerSale" class="form-control" wire:model.lazy="fee_rate" required>
+                    <label for="inputFeePerSale" class="font-quick text-dark font-normal">Fee per sale</label>
+                    @error('fee_rate')
+                        <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Note --}}
             <div class="col-12 mb-3">
                 <div class="form-floating">
                     <input type="text" id="inputNotes" class="form-control" wire:model.lazy="notes">

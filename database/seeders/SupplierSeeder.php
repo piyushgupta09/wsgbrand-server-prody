@@ -7,6 +7,8 @@ use Fpaipl\Prody\Models\Supplier;
 
 class SupplierSeeder extends Seeder
 {
+    // php artisan db:seed --class="Fpaipl\\Prody\\Database\\Seeders\\SupplierSeeder"
+
     /**
      * Run the database seeds.
      *
