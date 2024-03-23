@@ -14,11 +14,14 @@ class ProductRangeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // optimized for wsg
+
         return [
-            'id' => $this->id,
             'name' => $this->name,
+            'slug' => $this->slug,
             'mrp' => $this->mrp,
             'rate' => $this->rate,
+            'active' => $this->active,
         ];
     }
 }

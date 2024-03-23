@@ -16,7 +16,7 @@ class CategoryDatatable extends ModelDatatable
 
     public static function baseQuery($model): Builder
     {
-        return $model::with('parent');
+        return $model::with('parent')->canHaveChildren();
     }
 
     public function selectOptions($field): Collection
@@ -36,16 +36,16 @@ class CategoryDatatable extends ModelDatatable
     {
         return array_merge(
             array(
-                'add_new' => [
+                'sync_new' => [
                     'show' => [
                         'active' => true,
                         'trash' => false,
                     ],
-                    'icon' => 'bi bi-plus-lg',
-                    'label' => 'Create',
+                    'icon' => 'bi bi-download',
+                    'label' => 'Sync',
                     'type' => 'buttons.action-link',
                     'style' => '',
-                    'route' => 'categories.create',
+                    'route' => 'sync.categories',
                     'function' => ''
                 ],
             ),
@@ -76,58 +76,6 @@ class CategoryDatatable extends ModelDatatable
         return array_merge(
             parent::getDefaultPreColumns(),
             array(
-                'parent_id' => [
-                    'name' => 'parent_id',
-                    'labels' => [
-                        'table' => 'Parent Category',
-                        'export' => 'Parent Name'
-                    ],
-                    'thead' => [
-                        'view' => 'buttons.sortit',
-                        'value' => '',
-                        'align' => '',
-                    ],
-                    'tbody' => [
-                        'view' => 'cells.text-value',
-                        'value' => 'getTableData',
-                        'align' => '',
-                    ],
-                    'viewable' => [
-                        'active' => true,
-                        'trash' => false
-                    ],
-                    'expandable' => [
-                        'active' => true,
-                        'trash' => false,
-    
-                    ],
-                    'sortable' => true,
-                    'filterable' => [
-                        'active' => true,
-                        'trash' => false
-                    ],
-                    'importable' => true,
-                    'exportable' => [
-                        'active' => true,
-                        'trash' => false,
-                        'value' => 'getParentName'
-                    ],
-                    'artificial' => false,
-                    'fillable' => [
-                        'type' => '',
-                        'style' => '',
-                        'placeholder' => 'Choose Parent Category',
-                        'component' => 'forms.select-option',
-                        'options' =>  [
-                            'data' => self::selectOptions('parent_id'),
-                            'withRelation' => true,
-                            'relation' => 'child',
-                        ],
-                        'attributes' => ['autofocus'],
-                        'rows' => ''
-                    ],
-    
-                ],
                 'name' => [
                     'name' => 'name',
                     'labels' => [
@@ -176,58 +124,10 @@ class CategoryDatatable extends ModelDatatable
     
     
                 ],
-                'order' => [
-                    'name' => 'order',
-                    'labels' => [
-                        'table' => 'Order',
-                        'export' => 'Order'
-                    ],
-    
-                    'thead' => [
-                        'view' => 'buttons.sortit',
-                        'value' => '',
-                        'align' => '',
-                    ],
-                    'tbody' => [
-                        'view' => 'cells.text-value',
-                        'value' => 'getTableData',
-                        'align' => '',
-                    ],
-                    'viewable' => [
-                        'active' => false,
-                        'trash' => false
-                    ],
-                    'expandable' => [
-                        'active' => false,
-                        'trash' => false
-                    ],
-                    'sortable' => true,
-                    'filterable' => [
-                        'active' => true,
-                        'trash' => true
-                    ],
-                    'importable' => true,
-                    'exportable' => [
-                        'active' => true,
-                        'trash' => true,
-                        'value' => ''
-                    ],
-                    'artificial' => false,
-                    'fillable' => [
-                        'type' => 'text',
-                        'style' => '',
-                        'placeholder' => 'Order',
-                        'component' => 'forms.input-box',
-                        'attributes' => [],
-                        'rows' => '',
-                        'default' => 1,
-                    ],
-                ],
             ),
             parent::getDefaultImageColumn(),
             parent::getDefaultSlugColumns(),
             parent::getDefaultPostColumns(),
         );
     }
-
 }

@@ -2,9 +2,12 @@
 
 namespace Fpaipl\Prody\Database\Seeders;
 
-use Fpaipl\Prody\Models\Tax;
 use Illuminate\Database\Seeder;
+use Fpaipl\Prody\Models\Discount;
+use Fpaipl\Prody\Models\RefundPolicy;
+use Fpaipl\Prody\Models\Strategy;
 use Illuminate\Support\Facades\DB;
+use Fpaipl\Prody\Models\ReturnPolicy;
 
 class DatasetSeeder extends Seeder
 {
@@ -13,30 +16,6 @@ class DatasetSeeder extends Seeder
      */
     public function run(): void
     {
-        $taxes = [
-            ['hsncode' => '600490', 'rate' => '5'],
-            ['hsncode' => '600510', 'rate' => '5'],
-            ['hsncode' => '600523', 'rate' => '5'],
-            ['hsncode' => '600631', 'rate' => '5'],
-            ['hsncode' => '600632', 'rate' => '5'],
-            ['hsncode' => '600690', 'rate' => '5'],
-            ['hsncode' => '610310', 'rate' => '5'],
-            ['hsncode' => '630210', 'rate' => '5'],
-            ['hsncode' => '680221', 'rate' => '5'],
-            ['hsncode' => '60051000', 'rate' => '5'],
-            ['hsncode' => '60052400', 'rate' => '5'],
-            ['hsncode' => '60063200', 'rate' => '5'],
-            ['hsncode' => '60069000', 'rate' => '5'],
-        ];
-
-        foreach ($taxes as $tax) {
-            Tax::create([
-                'name' => $tax['hsncode'] . ' - GST ' . $tax['rate'] . '%',
-                'hsncode' => $tax['hsncode'],
-                'gstrate' => $tax['rate'],
-            ]);
-        }
-
         $overheads = array(
             [
                 "stage" => "production",
@@ -246,6 +225,157 @@ class DatasetSeeder extends Seeder
                 'unit' => $consumable['unit'],
                 'rate' => $consumable['rate'],
                 'details' => $consumable['details'],
+            ]);
+        }
+
+        // Product Pricing Strategy
+
+        $pricingStrategy = array(
+            [
+                'name' => 'Base Price',
+                'math' => 'add',
+                'value' => 0,
+                'type' => 'percentage',
+                'details' => 'No adjustment',
+                'active' => 1,
+            ],
+            [
+                'name' => 'Discounted Price',
+                'math' => 'less',
+                'value' => 10,
+                'type' => 'percentage',
+                'details' => '10% discount on 100+ units',
+            ],
+            [
+                'name' => 'Premium Price',
+                'math' => 'add',
+                'value' => 20,
+                'type' => 'percentage',
+                'details' => '20% extra on premium products',
+            ]
+        );
+
+        foreach ($pricingStrategy as $strategy) {
+            Strategy::create([
+                'name' => $strategy['name'],
+                'math' => $strategy['math'],
+                'value' => $strategy['value'],
+                'type' => $strategy['type'],
+                'details' => $strategy['details'],
+            ]);
+        }
+
+        // Discount Strategy
+
+        $discounts = array(
+            [
+                'name' => 'No Discount',
+                'value' => 0,
+                'type' => 'percentage',
+                'details' => 'No discount',
+            ],
+            [
+                'name' => 'Big Billions Day',
+                'value' => 20,
+                'type' => 'percentage',
+                'details' => '20% discount on order',
+                'multi_time' => true,
+                'on_total' => true,
+                'on_checkout' => true,
+                'min_total' => 25000,
+                'max_total' => 100000,
+            ],
+            [
+                'name' => 'Membership Discount',
+                'value' => 5,
+                'type' => 'percentage',
+                'details' => '5% discount on order for members',
+                'multi_time' => true,
+                'on_total' => true,
+                'on_checkout' => true,
+                'min_total' => 10000,
+                'max_total' => 1000000,
+            ],
+        );
+
+        foreach ($discounts as $discount) {
+            Discount::create([
+                'name' => $discount['name'],
+                'value' => $discount['value'],
+                'type' => $discount['type'],
+                'details' => $discount['details'],
+                'one_time' => isset($discount['one_time']) ? $discount['one_time'] : false,
+                'multi_time' => isset($discount['multi_time']) ? $discount['multi_time'] : false,
+                'on_total' =>  isset($discount['on_total']) ? $discount['on_total'] : false,
+                'on_checkout' => isset($discount['on_checkout']) ? $discount['on_checkout'] : false,
+                'min_total' =>isset($discount['min_total']) ? $discount['min_total'] : 0,
+                'max_total' => isset($discount['max_total']) ? $discount['max_total'] : 0,
+            ]);
+        }
+
+        // Return Policy
+
+        $returnPolicy = array(
+            [
+                'name' => 'No Return',
+                'details' => 'No return policy',
+                'active' => 1,
+            ],
+            [
+                'name' => '7 Days Return',
+                'details' => '7 days return policy',
+                'active' => 1,
+            ],
+            [
+                'name' => '15 Days Return',
+                'details' => '15 days return policy',
+                'active' => 1,
+            ],
+            [
+                'name' => '30 Days Return',
+                'details' => '30 days return policy',
+                'active' => 1,
+            ],
+        );
+
+        foreach ($returnPolicy as $policy) {
+            ReturnPolicy::create([
+                'name' => $policy['name'],
+                'details' => $policy['details'],
+                'active' => $policy['active'],
+            ]);
+        }
+
+        // Refund Policy
+
+        $refundPolicy = array(
+            [
+                'name' => 'No Refund',
+                'details' => 'No refund policy',
+                'active' => 1,
+            ],
+            [
+                'name' => '7 Days Refund',
+                'details' => '7 days refund policy',
+                'active' => 1,
+            ],
+            [
+                'name' => '15 Days Refund',
+                'details' => '15 days refund policy',
+                'active' => 1,
+            ],
+            [
+                'name' => '30 Days Refund',
+                'details' => '30 days refund policy',
+                'active' => 1,
+            ],
+        );
+
+        foreach ($refundPolicy as $policy) {
+            RefundPolicy::create([
+                'name' => $policy['name'],
+                'details' => $policy['details'],
+                'active' => $policy['active'],
             ]);
         }
 

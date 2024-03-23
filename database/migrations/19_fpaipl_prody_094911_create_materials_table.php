@@ -11,6 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('suppliers', function (Blueprint $table) {
+            $table->id();
+            $table->string('sid')->unique();
+            $table->string('name');
+            $table->string('address')->nullable();
+            $table->string('contact_person')->nullable();
+            $table->string('contact_number')->nullable();
+            $table->string('email')->nullable();
+            $table->string('website')->nullable();
+            $table->string('type')->default('material-supplier'); // material-supplier, service-provider, product-supplier
+            $table->json('apis')->nullable();
+            $table->longText('details')->nullable();
+            $table->boolean('active')->default(1);
+            $table->text('tags')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
             $table->string('sid')->unique();
@@ -64,5 +81,6 @@ return new class extends Migration
         Schema::dropIfExists('material_ranges');
         Schema::dropIfExists('material_options');
         Schema::dropIfExists('materials');
+        Schema::dropIfExists('suppliers');
     }
 };

@@ -31,6 +31,12 @@ class BrandProductsResource extends JsonResource
                 'updated_at' => $ledger->updated_at,
             ];
         });
+        
+        $assignedPartiesLastActivity = collect($assignedparties->sortByDesc('updated_at'))->first();
+        $lastActivityName = 'Not available';
+        if ($assignedPartiesLastActivity) {
+            $lastActivityName = $assignedPartiesLastActivity->last_activity ?? 'No Activity';
+        }
 
         return [
             // 'stock' => $this->quantity,
@@ -88,7 +94,7 @@ class BrandProductsResource extends JsonResource
             }),
             'tags' => $this->tags,
             'assigned_parties' => $assignedparties,
-            'last_activity' => $assignedparties->sortByDesc('updated_at')->first()['last_activity'],
+            'last_activity' => $lastActivityName,
             'stock' => $hasStock ? new BrandStockResource($this->stock) : null,
         ];
     }

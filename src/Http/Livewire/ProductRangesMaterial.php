@@ -63,7 +63,8 @@ class ProductRangesMaterial extends Component
             $this->consumption[$productMaterial->id . '_0']['grade'] = $productMaterial->grade;
             $this->consumption[$productMaterial->id . '_0']['name'] = null;
             $this->consumption[$productMaterial->id . '_0']['cost'] = $productMaterial->material->price;
-            $this->consumption[$productMaterial->id . '_0']['unit'] = config('prody.units.fcpu')['inch'];
+            $this->consumption[$productMaterial->id . '_0']['unit'] = $productMaterial->material->unit_abbr;
+            // $this->consumption[$productMaterial->id . '_0']['unit'] = config('prody.units.fcpu')['inch'];
             foreach ($productMaterial->material->materialRanges as $productMaterialRange) {
                 $this->consumption[$productMaterial->id . '_' . $productMaterialRange->id]['qty'] = null;
                 $this->consumption[$productMaterial->id . '_' . $productMaterialRange->id]['mrid'] = $productMaterialRange->id;
@@ -132,7 +133,7 @@ class ProductRangesMaterial extends Component
                     $consumptionRules["consumption.$key.pmid"] = ['required', 'numeric', 'exists:product_materials,id'];
                     $consumptionRules["consumption.$key.name"] = ['required', 'string', 'min:1', 'max:50'];
                     $consumptionRules["consumption.$key.cost"] = ['required', 'numeric', 'min:1'];
-                    $consumptionRules["consumption.$key.unit"] = ['required', 'in:' . implode(',', config('prody.units.fcpu'))];
+                    $consumptionRules["consumption.$key.unit"] = ['required'];
 
                     // Custom error messages for better user feedback
                     $customMessages = array_merge($customMessages, [
@@ -362,18 +363,32 @@ class ProductRangesMaterial extends Component
                 'class' => 'success',
                 'text' => 'Product range updated successfully.',
             ]);
-            
+        
         } catch (\Exception $e) {
             // Rollback transaction in case of an error
             DB::rollBack();
+        
+            // Get the error message
+            $errorMessage = $e->getMessage() . ' ' . $e->getLine();
 
             // Log the exception
-            Log::error('Error in updating product range: ' . $e->getMessage());
-
+            Log::error('Error in creating product range: ' . $errorMessage);
+        
+            // Start with a generic user-friendly message
+            $userFriendlyMessage = 'Failed to update product range.';
+        
+            // Check if the error message contains the specific SQL error for duplicate entry
+            if (preg_match('/1062 Duplicate entry/', $errorMessage) || Str::contains($errorMessage, '1062 Duplicate entry')) {
+                $userFriendlyMessage .= ' Duplicate entry found.';
+            } else {
+                // Include the full error message for other types of errors
+                $userFriendlyMessage .= ' Error: ' . $errorMessage;
+            }
+        
             // Redirect with error message
             return redirect()->route('products.show', $this->routeValue)->with('toast', [
                 'class' => 'danger',
-                'text' => 'Failed to update product range. Error: ' . $e->getMessage(),
+                'text' => $userFriendlyMessage,
             ]);
         }
     }

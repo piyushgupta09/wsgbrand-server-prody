@@ -203,33 +203,35 @@ class AttributeSeeder extends Seeder
             }
         }
 
-        $products = Product::all();
-        foreach ($products as $product) {
-            $attrikeys = Attrikey::all();
-            foreach ($attrikeys as $attrikey) {
-                $attrival = $attrikey->attrivals->first();
-                ProductAttribute::create([
-                    'product_id' => $product->id,
-                    'attrikey_id' => $attrikey->id,
-                    'attrival_id' => $attrival->id,
-                ]);
-            }
-            $measurekeys = Measurekey::all();
-            foreach ($measurekeys as $measurekey) {
-                $measureval = $measurekey->measurevals->first();
-                foreach ($measurekey->measurevals as $measureval) {
-                    ProductMeasurement::updateOrCreate(
-                        [
-                            'product_id' => $product->id,
-                            'measurekey_id' => $measurekey->id,
-                        ],
-                        [
-                            'measureval_id' => $measureval->id,
-                        ]
-                    );
-                }
-            }
-        }
+        // Product must be created first
+
+        // $products = Product::all();
+        // foreach ($products as $product) {
+        //     $attrikeys = Attrikey::all();
+        //     foreach ($attrikeys as $attrikey) {
+        //         $attrival = $attrikey->attrivals->first();
+        //         ProductAttribute::create([
+        //             'product_id' => $product->id,
+        //             'attrikey_id' => $attrikey->id,
+        //             'attrival_id' => $attrival->id,
+        //         ]);
+        //     }
+        //     $measurekeys = Measurekey::all();
+        //     foreach ($measurekeys as $measurekey) {
+        //         $measureval = $measurekey->measurevals->first();
+        //         foreach ($measurekey->measurevals as $measureval) {
+        //             ProductMeasurement::updateOrCreate(
+        //                 [
+        //                     'product_id' => $product->id,
+        //                     'measurekey_id' => $measurekey->id,
+        //                 ],
+        //                 [
+        //                     'measureval_id' => $measureval->id,
+        //                 ]
+        //             );
+        //         }
+        //     }
+        // }
 
     }
 }

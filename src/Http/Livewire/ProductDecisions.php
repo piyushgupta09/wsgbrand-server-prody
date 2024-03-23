@@ -52,6 +52,15 @@ class ProductDecisions extends Component
                 'tags' => 'sell, ecommerce, retail, wholesale',
             ],
             [
+                'name' => 'Strategy',
+                'slug' => 'strategy',
+                'tab' => 'decisions',
+                'required' => true,
+                'available' => true,
+                'details' => 'How we price the product, in place of default pricing',
+                'tags' => 'payment, logistics',
+            ],
+            [
                 'name' => 'Payment',
                 'slug' => 'payments',
                 'tab' => 'decisions',

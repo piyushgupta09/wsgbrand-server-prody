@@ -5,12 +5,12 @@
     <div x-data="{ show: @entangle('showForm') }" x-show="show" x-transition.delay.100ms class="card-body p-0 text-bg-secondary">
 
         @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
+            <div class="alert rounded p-2 mb-0">
+                <ol class="list-group list-group-flush list-group-numbered">
                     @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
+                        <li class="list-group-item list-group-item-danger">{{ $error }}</li>
                     @endforeach
-                </ul>
+                </ol>
             </div>
         @endif
         
@@ -24,29 +24,6 @@
                 @endif
                 <small class=d-block>To make this color of this product we need defined materials in these colors.</small>
             </p>
-
-            {{-- Product Option Name --}}
-            <div class="col-6 mb-3">
-                <div class="form-floating">
-                    <input type="text" id="productOptionName" class="form-control" wire:model.lazy="productOptionName" required>
-                    <label for="productOptionName" class="font-quick text-dark font-normal">Option Color Name</label>
-                    @error('productOptionName')
-                        <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
-                    @enderror
-                </div>
-            </div>
-
-            {{-- Product Option Color Code --}}
-            <div class="col-6 mb-3">
-                <div class="form-floating">
-                    <input type="text" id="productOptionCode" class="form-control" wire:model.lazy="productOptionCode" required>
-                    <label for="productOptionCode" class="font-quick text-dark font-normal">Option Color Code</label>
-                    <span style="font-size: 0.75rem" class="">Use hex color code, ex: #ea0021</span>
-                    @error('productOptionCode')
-                        <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
-                    @enderror
-                </div>
-            </div>
 
             {{-- Attach material option color to material as per product option --}}
             @if ($productMaterials->isNotEmpty())
@@ -103,7 +80,44 @@
                     </div>
                 </div>
             @endif
-           
+
+            @if (count($colorList))
+                <div class="p-2">
+                    Click on relevant color to select it as product base color.
+                </div>
+                <div class="d-flex mb-3">
+                    @foreach ($colorList as $item)
+                        <button wire:click="selectColor({{ $item['id'] }})" class="btn btn-light me-2 d-flex align-items-center">
+                            <div class="wh-30 border" style="background-color: {{ $item['code'] }}"></div>
+                            <span class="ms-2">{{ $item['name'] }}</span>
+                        </button>     
+                    @endforeach
+                </div>
+            @endif
+                   
+            {{-- Product Option Name --}}
+            <div class="col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" id="productOptionName" class="form-control" wire:model.lazy="productOptionName" required>
+                    <label for="productOptionName" class="font-quick text-dark font-normal">Option Color Name</label>
+                    @error('productOptionName')
+                        <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Product Option Color Code --}}
+            <div class="col-6 mb-3">
+                <div class="form-floating">
+                    <input type="text" id="productOptionCode" class="form-control" wire:model.lazy="productOptionCode" required>
+                    <label for="productOptionCode" class="font-quick text-dark font-normal">Option Color Code</label>
+                    <span style="font-size: 0.75rem" class="">Use hex color code, ex: #ea0021</span>
+                    @error('productOptionCode')
+                        <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+
             {{-- Preview & Upload Images --}}
             <div class="mb-3">
 
@@ -155,7 +169,10 @@
                 </div>
 
                 {{-- Upload --}}
-                <input type="file" id="productOptionImages" class="form-control" wire:model="productOptionImages" multiple required>
+                <input type="file" id="productOptionImages" class="form-control" 
+                    wire:model="productOptionImages" multiple required
+                    accept="image/jpeg, image/png, image/webp">
+
                 <small>Upload the product images in respect of this color only</small>
 
                 {{-- Errors --}}
@@ -187,7 +204,7 @@
                         
                         <div class="flex-fill d-flex align-items-center font-quick mb-2">
                             <span style="width: 20px">{{ $loop->iteration }}</span>
-                            <div class="me-3 w-35p h-100 rounded" style="background-color: {{ $productOption->code }}"></div>
+                            <div class="me-3 w-35p h-100 rounded border" style="background-color: {{ $productOption->code }}"></div>
                             <p class="mb-0 text-capitalize fw-bold">{{ $productOption->name }}</p>
                         </div>
     
@@ -229,7 +246,34 @@
                     </div>
                     
                     <div class="collapse" id="collapseOptionImages{{ $key }}">
-                        <div class="d-flex">
+                        <div class="d-flex flex-column">
+                            <table class="table table-sm table-borderless table-striped mt-2 mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td>Product Option</td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end align-items-center">
+                                                <div class="me-2 wh-25 rounded border" style="background-color: {{ $productOption->code }}"></div>
+                                                <span>{{ $productOption->name }}</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @foreach ($productOption->materialOptions as $item)
+                                        <tr>
+                                            <td>{{ $item->material->sid }} - {{ $item->material->name }}</td>
+                                            <td class="text-end">
+                                                <div class="d-flex justify-content-end align-items-center">
+                                                    <div class="me-2 wh-25 rounded border" style="background-color: {{ $item->code }}"></div>
+                                                    <span>{{ $item->name }}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    <tr>
+                                        <td colspan="2">Uploaded Images</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                             @if (!empty($productOption->getMedia($productOption->getMediaCollectionName())))
                                 @foreach ($productOption->getMedia($productOption->getMediaCollectionName()) as $media)
                                     <img src="{{ $media->getUrl('s100') }}" class="rounded me-2" width="100px" height="120px" style="object-fit: cover"/>

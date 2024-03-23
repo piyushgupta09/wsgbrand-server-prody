@@ -61,19 +61,19 @@ class Material extends Model
     public function getTableData($key)
     {
         switch ($key) {
-            // case 'unit_name': return $this->unit->abbr;
+            case 'supplier_id': return $this->supplier->name;
             default: return $this->$key;
         }
     }
 
-    // add static created method
-    public static function boot()
-    {
-        parent::boot();
-        static::created(function ($material) {
-            $material->update(['name' => $material->category_name . '-' . $material->name]);
-        });
-    }
+    // // add static created method
+    // public static function boot()
+    // {
+    //     parent::boot();
+    //     static::created(function ($material) {
+    //         $material->update(['name' => $material->category_name . '-' . $material->name]);
+    //     });
+    // }
 
     public function materialOptions(): HasMany
     {

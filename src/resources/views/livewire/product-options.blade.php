@@ -5,12 +5,12 @@
     <div x-data="{ show: @entangle('showForm') }" x-show="show" x-transition.delay.100ms class="card-body p-0 text-bg-secondary">
 
         @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
+            <div class="alert rounded p-2 mb-0">
+                <ol class="list-group list-group-flush list-group-numbered">
                     @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
+                        <li class="list-group-item list-group-item-danger">{{ $error }}</li>
                     @endforeach
-                </ul>
+                </ol>
             </div>
         @endif
         
@@ -99,7 +99,9 @@
                 </div>
 
                 {{-- Upload --}}
-                <input type="file" id="productOptionImages" class="form-control" wire:model="productOptionImages" multiple required>
+                <input type="file" id="productOptionImages" class="form-control" 
+                wire:model="productOptionImages" multiple required
+                accept="image/jpeg, image/png, image/webp">
                 <small>Upload the product images in respect of this color only</small>
 
                 {{-- Errors --}}
@@ -131,7 +133,7 @@
                         
                         <div class="flex-fill d-flex align-items-center font-quick mb-2">
                             <span style="width: 20px">{{ $loop->iteration }}</span>
-                            <div class="me-3 w-35p h-100 rounded" style="background-color: {{ $productOption->code }}"></div>
+                            <div class="me-3 w-35p h-100 rounded border" style="background-color: {{ $productOption->code }}"></div>
                             <p class="mb-0 text-capitalize fw-bold">{{ $productOption->name }}</p>
                         </div>
     
@@ -173,7 +175,23 @@
                     </div>
                     
                     <div class="collapse" id="collapseOptionImages{{ $key }}">
-                        <div class="d-flex">
+                        <div class="d-flex flex-column">
+                            <table class="table table-sm table-borderless table-striped mt-2 mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td>Product Option</td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end align-items-center">
+                                                <div class="me-2 wh-25 rounded border" style="background-color: {{ $productOption->code }}"></div>
+                                                <span>{{ $productOption->name }}</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">Uploaded Images</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                             @if (!empty($productOption->getMedia($productOption->getMediaCollectionName())))
                                 @foreach ($productOption->getMedia($productOption->getMediaCollectionName()) as $media)
                                     <img src="{{ $media->getUrl('s100') }}" class="rounded me-2" width="100px" height="120px" style="object-fit: cover"/>

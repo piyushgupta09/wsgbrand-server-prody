@@ -33,6 +33,8 @@ return new class extends Migration
         // Create the products table
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->string('sid')->unique()->index();
+            $table->string('uuid')->unique()->index();
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('code')->unique();

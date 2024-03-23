@@ -20,7 +20,6 @@ class ProdyDatabaseSeeder extends Seeder
     {
         $this->call(DatasetSeeder::class);
         $this->call(SupplierSeeder::class);
-        $this->call(DummySeeder::class);
         $this->call(AttributeSeeder::class);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Fpaipl\Brandy\Http\Coordinators\SyncCoordinator;
 use Fpaipl\Prody\Http\Coordinators\ProductCoordinator;
 
 $assignableRoles = config('panel.assignable-roles');
@@ -19,4 +20,12 @@ Route::middleware(['api', 'auth:sanctum'])->prefix('api')->group(
         });
     });
 
+});
+
+
+Route::middleware(['api'])->prefix('api')->group(function () {    
+    Route::prefix('sync')->group(function () {
+        Route::post('products_count/{wsgbrand}', [SyncCoordinator::class, 'productsCount']);
+        Route::post('products/{wsgbrand}', [SyncCoordinator::class, 'products']);
+    });
 });

@@ -69,6 +69,13 @@ class ProductOption extends Model implements HasMedia
         return $this->getFirstMediaUrl($this->getMediaCollectionName(), $conversion);
     }
 
+    public function getImages($conversion = self::MEDIA_CONVERSION_THUMB)
+    {
+        return $this->getMedia($this->getMediaCollectionName())->map(function ($media) use ($conversion) {
+            return $media->getUrl($conversion);
+        });
+    }
+
     public function getMediaCollectionName()
     {
         return self::MEDIA_COLLECTION_NAME;

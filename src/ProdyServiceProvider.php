@@ -13,15 +13,15 @@ use Fpaipl\Prody\Http\Livewire\ProductOptions;
 use Fpaipl\Prody\Http\Livewire\ProductPricing;
 use Fpaipl\Prody\Http\Livewire\MaterialOptions;
 use Fpaipl\Prody\Http\Livewire\ProductSections;
-use Fpaipl\Prody\Http\Livewire\ProductAttribute;
 use Fpaipl\Prody\Http\Livewire\ProductCostsheet;
 use Fpaipl\Prody\Http\Livewire\ProductDecisions;
 use Fpaipl\Prody\Http\Livewire\ProductMaterials;
 use Fpaipl\Prody\Http\Livewire\ProductOverheads;
+use Fpaipl\Prody\Http\Livewire\ProductStrategies;
 use Fpaipl\Prody\Http\Livewire\ProductProcesses;
 use Fpaipl\Prody\Http\Livewire\ProductAttributes;
 use Fpaipl\Prody\Http\Livewire\ProductFixedcosts;
-use Fpaipl\Prody\Http\Livewire\CollectionProducts;
+use Fpaipl\Prody\Http\Livewire\ProductCollections;
 use Fpaipl\Prody\Http\Livewire\ProductConsumables;
 use Fpaipl\Prody\Http\Livewire\ProductPartyLedger;
 use Fpaipl\Prody\Http\Livewire\ProductMeasurements;
@@ -56,6 +56,7 @@ class ProdyServiceProvider extends ServiceProvider
         Livewire::component('product-decisions', ProductDecisions::class);
         Livewire::component('product-details', ProductDetails::class);
         Livewire::component('product-stock', ProductStock::class);
+        Livewire::component('product-strategies', ProductStrategies::class);
 
         Livewire::component('product-attributes', ProductAttributes::class);
         Livewire::component('product-measurements', ProductMeasurements::class);
@@ -72,7 +73,7 @@ class ProdyServiceProvider extends ServiceProvider
         Livewire::component('product-overheads', ProductOverheads::class);
         Livewire::component('product-processes', ProductProcesses::class);
         Livewire::component('product-status', ProductStatus::class);
-        Livewire::component('collection-products', CollectionProducts::class);
+        Livewire::component('product-collections', ProductCollections::class);
         Livewire::component('product-costsheet-preview', ProductCostsheetPreview::class);
     }
 }

@@ -270,6 +270,46 @@ class SupplierDatatable extends ModelDatatable
                     ],
                 ],
 
+                'materials' => [
+                    'name' => 'materials',
+                    'labels' => [
+                        'table' => 'Materials',
+                        'export' => 'Materials'
+                    ],
+    
+                    'thead' => [
+                        'view' => 'buttons.sortit',
+                        'value' => '',
+                        'align' => '',
+                    ],
+                    'tbody' => [
+                        'view' => 'cells.text-value',
+                        'value' => 'getTableData',
+                        'align' => '',
+                    ],
+                    'viewable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'expandable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'sortable' => true,
+                    'filterable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'importable' => false,
+                    'exportable' => [
+                        'active' => true,
+                        'trash' => true,
+                        'value' => 'getTableData'
+                    ],
+                    'artificial' => true,
+                    'fillable' => [],
+                ],
+
                 'contact_person' => [
                     'name' => 'contact_person',
                     'labels' => [

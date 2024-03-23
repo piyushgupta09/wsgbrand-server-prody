@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 class ProductDatatable extends ModelDatatable
 {
     const SORT_SELECT_DEFAULT = 'updated_at#desc';
+
+    const DUPLICATE = true;
     
     public static function baseQuery($model): Builder
     {
@@ -429,6 +431,45 @@ class ProductDatatable extends ModelDatatable
                         'active' => true,
                         'trash' => true,
                         'value' => 'getTableData'
+                    ],
+                    'artificial' => true,
+                    'fillable' => [],
+                ],
+                'decision' => [
+                    'name' => 'decision',
+                    'labels' => [
+                        'table' => 'Decision',
+                        'export' => 'Decision'
+                    ],
+    
+                    'thead' => [
+                        'view' => 'buttons.sortit',
+                        'value' => '',
+                        'align' => '',
+                    ],
+                    'tbody' => [
+                        'view' => 'cells.text-value',
+                        'value' => 'getTableData',
+                        'align' => '',
+                    ],
+                    'viewable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'expandable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'sortable' => false,
+                    'filterable' => [
+                        'active' => false,
+                        'trash' => false
+                    ],
+                    'importable' => false,
+                    'exportable' => [
+                        'active' => false,
+                        'trash' => false,
+                        'value' => ''
                     ],
                     'artificial' => true,
                     'fillable' => [],

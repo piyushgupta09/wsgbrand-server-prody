@@ -4,6 +4,8 @@ namespace Fpaipl\Prody\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Fpaipl\Prody\Models\Product;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Fpaipl\Panel\Http\Controllers\PanelController;
 use Fpaipl\Prody\Http\Requests\ProductEditRequest;
 use Fpaipl\Prody\Http\Requests\ProductCreateRequest;
@@ -26,16 +28,44 @@ class ProductController extends PanelController
      */
     public function store(ProductCreateRequest $request)
     {
-        $product = Product::create($request->validated());
-        if (isset($product)) {
-            return redirect()->route('products.index')->with('toast', [
+        DB::beginTransaction();
+
+        try {
+            $product = Product::create($request->validated());
+            
+            if (!isset($product)) {
+                throw new \Exception('Product creation failed.');
+            }
+
+            // If withrelations is set, duplicate the related records
+            if ($request->has('withrelations')) {
+
+                // validate if the po with id exists in the database
+                $this->validate($request, [
+                    'withrelations' => 'exists:products,slug'
+                ], [
+                    'withrelations.exists' => 'Product with id ' . $request->input('withrelations') . ' does not exist'
+                ]);
+
+                $existingProduct = Product::where('slug', $request->input('withrelations'))->first();
+                $existingProduct->duplicateRelations($product);                
+            }
+
+            DB::commit();
+
+            return redirect()->route('products.show', $product->slug)->with('toast', [
                 'class' => 'success',
-                'text' => $this->messages['create_success']
+                'text' => 'Product created successfully.'
             ]);
-        } else {
+
+        } catch (\Exception $e) {
+            
+            Log::info($e->getMessage());
+            DB::rollBack();
+
             return redirect()->route('products.index')->withInput()->with('toast', [
                 'class' => 'danger',
-                'text' => $this->messages['create_error']
+                'text' => 'Something went wrong. Please try again.'
             ]);
         }
     }
@@ -47,12 +77,12 @@ class ProductController extends PanelController
     {
         try {
             $product->update($request->validated());
-            return redirect()->route('products.edit', $product)->with('toast', [
+            return redirect()->route('products.show', $product->slug)->with('toast', [
                 'class' => 'success',
                 'text' => $this->messages['edit_success']
             ]);
         } catch (\Exception $e) {
-            return redirect()->route('products.index')->withInput()->with('toast', [
+            return redirect()->route('products.show', $product->slug)->withInput()->with('toast', [
                 'class' => 'danger',
                 'text' => $this->messages['edit_error']
             ]);

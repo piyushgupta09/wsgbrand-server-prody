@@ -64,6 +64,11 @@ return new class extends Migration
                   ->constrained()
                   ->onUpdate('cascade')
                   ->onDelete('cascade');
+
+            $table->foreignId('product_range_id')
+                  ->constrained()
+                  ->onUpdate('cascade')
+                  ->onDelete('cascade');
             
             // Ensures referential integrity for the measurekey_id
             $table->foreignId('measurekey_id')
@@ -77,8 +82,8 @@ return new class extends Migration
                   ->onUpdate('cascade')
                   ->onDelete('cascade');
             
-            // Enforces the unique combination of product_id, measurekey_id, and measureval_id
-            $table->unique(['product_id', 'measurekey_id', 'measureval_id'], 'product_measurement_keyval');
+            // Enforces the unique combination of product_id, measurekey_id,
+            $table->unique(['product_id', 'product_range_id', 'measurekey_id'], 'product_measurement_keyval');
             
             $table->timestamps();
         });

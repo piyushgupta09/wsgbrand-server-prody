@@ -101,6 +101,22 @@
                                 {{-- Material Consumption Unit --}}
                                 <div class="col-lg-4">
                                     <div class="form-floating">
+                                        <input id="productMaterialConsumptionUnit{{ $productMaterial->id }}_0" type="text"
+                                            class="form-control" required disabled
+                                            wire:model="consumption.{{ $productMaterial->id }}_0.unit">
+                                        <label for="productMaterialConsumptionUnit{{ $productMaterial->id }}_0"
+                                            class="font-quick text-dark font-normal">
+                                            {{ $loop->iteration }}. Material Cost Price
+                                        </label>
+                                        <small>Unit of consumption must be same as unit of material</small>
+                                        @error('consumption.' . $productMaterial->id . '_0.cost')
+                                        <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message
+                                            }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                {{-- <div class="col-lg-4">
+                                    <div class="form-floating">
                                         <select class="form-select" required
                                             id="productMaterialConsumptionUnit{{ $productMaterial->id }}_0"
                                             wire:model="consumption.{{ $productMaterial->id }}_0.unit">
@@ -118,7 +134,7 @@
                                             }}</span>
                                         @enderror
                                     </div>
-                                </div>
+                                </div> --}}
 
                                 {{-- Material Cost --}}
                                 <div class="col-lg-4">

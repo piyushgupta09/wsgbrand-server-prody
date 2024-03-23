@@ -37,6 +37,7 @@ class ProductOptionsMaterial extends Component
     public $proOptions;
 
     public $productOptions;
+    public $colorList;
 
     public $materialOptions;
     public $productMaterials;
@@ -60,6 +61,27 @@ class ProductOptionsMaterial extends Component
         $this->productOptions[$id]['code'] = $value;
     }
 
+    public function updatedProductOptions($value, $name)
+    {
+        $materialOption = MaterialOption::find($value);
+        if ($materialOption) {
+            array_push($this->colorList, [
+                'id' => $materialOption->id,
+                'name' => $materialOption->name,
+                'code' => $materialOption->code,
+            ]);
+        } else {
+            $this->addError('productOptions', 'The selected material option is invalid.');
+        }
+    }
+
+    public function selectColor($id)
+    {
+        $materialOption = MaterialOption::find($id);
+        $this->productOptionName = $materialOption->name;
+        $this->productOptionCode = $materialOption->code;
+    }
+
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
@@ -78,6 +100,7 @@ class ProductOptionsMaterial extends Component
 
     public function resetForm()
     {
+        $this->colorList = [];
         $this->productOptionName = '';
         $this->productOptionCode = '';
         $this->productOptionImages = [];
@@ -106,11 +129,19 @@ class ProductOptionsMaterial extends Component
     {
         // Validate form inputs including images
         $this->validate([
-            'productOptions' => 'required|array|min:1',
+            'productOptions.*.id' => 'required|exists:material_options,id',
             'productOptionName' => 'required|string|min:3|max:100',
             'productOptionCode' => 'required|string|min:7|max:7',
-            'productOptionImages.*' => 'image|mimes:jpg,jpeg,png,webp', // Assuming images are optional
+            'productOptionImages' => 'required', // Make the images required
+            'productOptionImages.*' => 'image|mimes:jpg,jpeg,png,webp', // Validate each image file
+        ], [
+            'productOptions.*.id.required' => 'The selected material option is invalid.',
+            'productOptionName.required' => 'The product option name is required.',
+            'productOptionCode.required' => 'The product option color code is required.',
+            'productOptionImages.required' => 'At least one image is required.', // Custom message for no image
+            'productOptionImages.*.image' => 'The uploaded file must be an image.',
         ]);
+
 
         // Additional validation to ensure at least one image is uploaded
         if (empty($this->productOptionImages) || count($this->productOptionImages) === 0) {
@@ -119,7 +150,7 @@ class ProductOptionsMaterial extends Component
                 'text' => 'At least one image is required.',
             ]);
         }
-        
+
         // Check if the product option already exists
         $productOption = ProductOption::where('product_id', $this->product->id)->where('slug', Str::slug($this->productOptionName))->first();
         if ($productOption) {
@@ -128,12 +159,12 @@ class ProductOptionsMaterial extends Component
                 'text' => 'Product Option already exists.',
             ]);
         }
-   
+
         try {
 
             // Start transaction
             DB::beginTransaction();
-            
+
             // Loop through productOptions array
             foreach ($this->productOptions as $key => $materialOptionId) {
 
@@ -187,7 +218,7 @@ class ProductOptionsMaterial extends Component
                         'grade' => $grade,
                     ]
                 );
-  
+
                 // Attach the uploaded images to the new product option
                 // Assuming $this->productOptionImages holds the Livewire uploaded files
                 foreach ($this->productOptionImages as $image) {
@@ -195,8 +226,8 @@ class ProductOptionsMaterial extends Component
                     $path = $image->storePublicly('public/temp', 'local'); // Adjusted to use the 'public/temp' directory explicitly
 
                     // Generate the full path for addMedia
-                    $fullPath = storage_path('app/'.$path);
-    
+                    $fullPath = storage_path('app/' . $path);
+
                     try {
                         // Use the full path to attach the image to the media collection
                         $productOption->addMedia($fullPath)->toMediaCollection(ProductOption::MEDIA_COLLECTION_NAME);
@@ -213,11 +244,10 @@ class ProductOptionsMaterial extends Component
                 'class' => 'success',
                 'text' => 'Product Options created successfully.',
             ]);
-        
         } catch (\Exception $e) {
             // Rollback transaction in case of an error
             DB::rollBack();
-            
+
             // Log the exception
             Log::error('Error in creating product range: ' . $e->getMessage());
 
@@ -234,7 +264,6 @@ class ProductOptionsMaterial extends Component
                 'text' => 'Failed to create product option.',
             ]);
         }
-            
     }
 
     public function edit($productOptionId)
@@ -276,26 +305,20 @@ class ProductOptionsMaterial extends Component
 
     public function update()
     {
-        // Validate form inputs
+        // Validate form inputs including images
         $this->validate([
-            'productOptions' => 'required|array|min:1',
+            'productOptions.*.id' => 'required|exists:material_options,id',
+            'productOptionName' => 'required|string|min:3|max:100',
             'productOptionCode' => 'required|string|min:7|max:7',
-            'productOptionImages.*' => 'image|mimes:jpg,jpeg,png,webp', 
+            'productOptionImages.*' => 'image|mimes:jpg,jpeg,png,webp', // Validate each image file
+        ], [
+            'productOptions.*.id.required' => 'The selected material option is invalid.',
+            'productOptionName.required' => 'The product option name is required.',
+            'productOptionCode.required' => 'The product option color code is required.',
+            'productOptionImages.*.image' => 'The uploaded file must be an image.',
         ]);
 
-        // Additional validation to ensure at least one image is uploaded
-        if (empty($this->productOptionImages) || count($this->productOptionImages) === 0) {
-            return redirect()->route('products.show', $this->routeValue)->with('toast', [
-                'class' => 'danger',
-                'text' => 'At least one image is required.',
-            ]);
-        }
-
-        // DB::transaction(function () {
-
-        // Update ProductOption
         $productOption = ProductOption::find($this->productOptionId);
-        $productOption->update(['code' => $this->productOptionCode]);
 
         // check if user has updated name , then return warning that it cant be updated
         if ($productOption->name != $this->productOptionName) {
@@ -304,6 +327,9 @@ class ProductOptionsMaterial extends Component
                 'text' => 'Product Option name cannot be updated.',
             ]);
         }
+
+        // Update the product option code
+        $productOption->update(['code' => $this->productOptionCode]);
 
         // Remove existing pomos associated with this product option
         Pomo::where('product_option_id', $productOption->id)->delete();
@@ -364,49 +390,93 @@ class ProductOptionsMaterial extends Component
             $product = ProductOption::find($productOptionId)->product->slug;
             // Redirect to the product show page, cause the model is not closing
             return redirect()->route('products.show', $this->routeValue);
-            } else {
+        } else {
             session()->flash('message', 'The image could not be deleted. It might not belong to the correct product color option.');
         }
     }
 
     public function delete($productOptionId)
     {
-        // Find the product option
-        $productOption = ProductOption::find($productOptionId);
+        try {
+            // Find the product option
+            $productOption = ProductOption::find($productOptionId);
 
-        // Check if the product option has stock item, if yes then return warning that it cant be deleted
-        if ($productOption->stockItems->count() > 0) {
+            // Check if the product option has stock item, if yes then return warning that it cant be deleted
+            if ($productOption->stockItems->count() > 0) {
+                return redirect()->route('products.show', $this->routeValue)->with('toast', [
+                    'class' => 'danger',
+                    'text' => 'Cannot delete, Stock exits.',
+                ]);
+            }
+
+            if ($productOption) {
+                // Begin a transaction
+                DB::transaction(function () use ($productOption) {
+
+                    // Delete associated Pomo records
+                    Pomo::where('product_option_id', $productOption->id)->delete();
+
+                    // Delete all media associated with the product option
+                    $productOption->clearMediaCollection(ProductOption::MEDIA_COLLECTION_NAME);
+
+                    // Delete the product option itself
+                    $productOption->delete();
+                });
+
+                // Redirect to the product show page
+                return redirect()->route('products.show', $this->routeValue)->with('toast', [
+                    'class' => 'success',
+                    'text' => 'Product Option is deleted successfully.',
+                ]);
+            } else {
+                // Redirect to the product show page
+                return redirect()->route('products.show', $this->routeValue)->with('toast', [
+                    'class' => 'error',
+                    'text' => 'Product Option is not found.',
+                ]);
+            } // Find the product option
+            $productOption = ProductOption::find($productOptionId);
+
+            // Check if the product option has stock item, if yes then return warning that it cant be deleted
+            if ($productOption->stockItems->count() > 0) {
+                return redirect()->route('products.show', $this->routeValue)->with('toast', [
+                    'class' => 'danger',
+                    'text' => 'Cannot delete, Stock exits.',
+                ]);
+            }
+
+            if ($productOption) {
+                // Begin a transaction
+                DB::transaction(function () use ($productOption) {
+
+                    // Delete associated Pomo records
+                    Pomo::where('product_option_id', $productOption->id)->delete();
+
+                    // Delete all media associated with the product option
+                    $productOption->clearMediaCollection(ProductOption::MEDIA_COLLECTION_NAME);
+
+                    // Delete the product option itself
+                    $productOption->delete();
+                });
+
+                // Redirect to the product show page
+                return redirect()->route('products.show', $this->routeValue)->with('toast', [
+                    'class' => 'success',
+                    'text' => 'Product Option is deleted successfully.',
+                ]);
+            } else {
+                // Redirect to the product show page
+                return redirect()->route('products.show', $this->routeValue)->with('toast', [
+                    'class' => 'error',
+                    'text' => 'Product Option is not found.',
+                ]);
+            }
+        } catch (\Throwable $th) {
+            Log::error('Error in deleting product option: ' . $th->getMessage());
+            // Redirect to the product show page
             return redirect()->route('products.show', $this->routeValue)->with('toast', [
                 'class' => 'danger',
-                'text' => 'Cannot delete, Stock exits.',
-            ]);
-        }
-
-        if ($productOption) {
-            // Begin a transaction
-            DB::transaction(function () use ($productOption) {
-
-                // Delete associated Pomo records
-                Pomo::where('product_option_id', $productOption->id)->delete();
-
-                // Delete all media associated with the product option
-                $productOption->clearMediaCollection(ProductOption::MEDIA_COLLECTION_NAME);
-
-                // Delete the product option itself
-                $productOption->delete();
-            });
-
-            // Redirect to the product show page
-            return redirect()->route('products.show', $this->routeValue)->with('toast', [
-                'class' => 'success',
-                'text' => 'Product Option is deleted successfully.',
-            ]);
-            
-        } else {
-            // Redirect to the product show page
-            return redirect()->route('products.show', $this->routeValue)->with('toast', [
-                'class' => 'error',
-                'text' => 'Product Option is not found.',
+                'text' => 'Something went wrong. Failed to delete product option.',
             ]);
         }
     }

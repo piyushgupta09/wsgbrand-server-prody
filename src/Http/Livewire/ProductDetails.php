@@ -121,6 +121,13 @@ class ProductDetails extends Component
                 'required' => false,
                 'available' => $this->model->productDecisions->retail || $this->model->productDecisions->ecomm,
             ],
+            [
+                'name' => 'Collections',
+                'slug' => 'collections',
+                'tab' => 'collections',
+                'required' => false,
+                'available' => $this->model->productDecisions->retail || $this->model->productDecisions->ecomm || $this->model->productDecisions->inbulk,
+            ],
         ]);
     }
 

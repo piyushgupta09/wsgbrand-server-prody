@@ -34,6 +34,7 @@ return new class extends Migration
             $table->boolean('locked')->default(false);
             $table->boolean('cost_locked')->default(false);
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->unique('product_id');
             $table->timestamps();
         });
 
@@ -114,7 +115,9 @@ return new class extends Migration
         Schema::create('strategies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->decimal('value', 8, 2); // This can be a percentage or fixed value based on the 'adjustment_type'
+            $table->string('slug')->unique();
+            $table->string('math')->default('add'); // Determines if the value is added or subtracted from the base price
+            $table->float('value'); // This can be a percentage or fixed value based on the 'adjustment_type'
             $table->string('type')->default('percentage'); // Determines if 'adjustment_value' is a percentage or fixed amount
             $table->text('details')->nullable(); // Additional details or conditions
             $table->boolean('active')->default(true);
@@ -126,13 +129,17 @@ return new class extends Migration
         // Decision 3.2: Associate products with pricing strategies
         Schema::create('product_strategy', function (Blueprint $table) {
             $table->id();
+            $table->string('decision'); // Decision 1: Ecomm, Retail, Inbulk, POS
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('strategy_id')->constrained()->onDelete('cascade');
-            $table->decimal('value', 8, 2); // This can be a percentage or fixed value based on the 'adjustment_type'
+            // Only one pricing strategy can be applied to a product at a time
+            $table->unique(['product_id', 'strategy_id', 'decision'])->name('product_strategy_unique');
+            // 
+            $table->string('name');
+            $table->string('math')->default('add'); // Determines if the value is added or subtracted from the base price
+            $table->float('value'); // This can be a percentage or fixed value based on the 'adjustment_type'
             $table->string('type')->default('percentage'); // Determines if 'adjustment_value' is a percentage or fixed amount
             $table->text('details')->nullable(); // Additional details or conditions
-            $table->boolean('active')->default(true);
-            $table->text('tags')->nullable();
             $table->timestamps();
         });
 
@@ -142,7 +149,7 @@ return new class extends Migration
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->decimal('value', 8, 2); // This can be a percentage or fixed value based on the 'adjustment_type'
+            $table->float('value'); // This can be a percentage or fixed value based on the 'adjustment_type'
             $table->string('type')->default('percentage'); // Determines if 'adjustment_value' is a percentage or fixed amount
             $table->text('details')->nullable(); // Additional details or conditions
 
@@ -157,12 +164,12 @@ return new class extends Migration
             $table->boolean('on_product')->default(false); // Apply discount on the each product
 
             // If the discount is based on quantity, then the following fields are used
-            $table->integer('min_quantity')->default(0); // Minimum quantity for discount
+            $table->integer('min_quantity')->default(1); // Minimum quantity for discount
             $table->integer('max_quantity')->default(0); // Maximum quantity for discount
 
             // If the discount is based on total amount, then the following fields are used
-            $table->decimal('min_total', 8, 2)->default(0.00); // Minimum total for discount
-            $table->decimal('max_total', 8, 2)->default(0.00); // Maximum total for discount
+            $table->integer('min_total')->default(1); // Minimum total for discount
+            $table->integer('max_total')->default(0); // Maximum total for discount
 
             $table->boolean('active')->default(true);
             $table->text('tags')->nullable();
@@ -173,9 +180,10 @@ return new class extends Migration
         // Decision 4.2: Associate products with discount strategies
         Schema::create('product_discount', function (Blueprint $table) {
             $table->id();
+            $table->string('decision'); // Decision 1: Ecomm, Retail, Inbulk, POS
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->foreignId('discount_id')->constrained()->onDelete('cascade');
-            $table->decimal('value', 8, 2); // This can be a percentage or fixed value based on the 'adjustment_type'
+            $table->float('value'); // This can be a percentage or fixed value based on the 'adjustment_type'
             $table->string('type')->default('percentage'); // Determines if 'adjustment_value' is a percentage or fixed amount
             $table->text('details')->nullable(); // Additional details or conditions
 
@@ -190,17 +198,68 @@ return new class extends Migration
             $table->boolean('on_product')->default(false); // Apply discount on the each product
 
             // If the discount is based on quantity, then the following fields are used
-            $table->integer('min_quantity')->default(0); // Minimum quantity for discount
+            $table->integer('min_quantity')->default(1); // Minimum quantity for discount
             $table->integer('max_quantity')->default(0); // Maximum quantity for discount
 
             // If the discount is based on total amount, then the following fields are used
-            $table->decimal('min_total', 8, 2)->default(0.00); // Minimum total for discount
-            $table->decimal('max_total', 8, 2)->default(0.00); // Maximum total for discount
+            $table->integer('min_total')->default(1); // Minimum total for discount
+            $table->integer('max_total')->default(0); // Maximum total for discount
 
             $table->boolean('active')->default(true);
             $table->text('tags')->nullable();
             $table->timestamps();
         });
+
+        // Decision 5: Return Policy & Refund Policy
+
+        Schema::create('refund_policies', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->text('details')->nullable();
+            $table->boolean('active')->default(true);
+            $table->text('tags')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('product_refund_policy', function (Blueprint $table) {
+            $table->id();
+            $table->string('decision'); // Decision 1: Ecomm, Retail, Inbulk, POS
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('refund_policy_id')->constrained()->onDelete('cascade');
+            $table->unique(['product_id', 'refund_policy_id', 'decision'])->name('product_refund_policy_unique');
+            $table->timestamps();
+        });
+
+        Schema::create('return_policies', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->text('details')->nullable();
+            $table->boolean('active')->default(true);
+            $table->text('tags')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('product_return_policy', function (Blueprint $table) {
+            $table->id();
+            $table->string('decision'); // Decision 1: Ecomm, Retail, Inbulk, POS
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('return_policy_id')->constrained()->onDelete('cascade');
+            $table->unique(['product_id', 'return_policy_id', 'decision'])->name('product_return_policy_unique');
+            $table->timestamps();
+        });
+
+        Schema::create('collection_product', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('wsg_collection_id')->nullable();
+            $table->foreignId('collection_id')->constrained();
+            $table->foreignId('product_id')->constrained();
+            $table->foreignId('product_option_id')->constrained();
+            $table->unique(['collection_id','product_id']);
+            $table->timestamps();
+        });
+        
     }
 
     /**
@@ -221,6 +280,7 @@ return new class extends Migration
         Schema::dropIfExists('platforms');
         Schema::dropIfExists('product_decisions');
         Schema::dropIfExists('decisions');
+        Schema::dropIfExists('collection_product');
     }
 };
 

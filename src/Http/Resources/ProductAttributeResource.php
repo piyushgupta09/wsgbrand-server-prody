@@ -15,8 +15,8 @@ class ProductAttributeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name' => $this->name,
-            'value' => $this->value,
+            'name' => $this->attrikey->name,
+            'value' => $this->attrival->value,
         ];
     }
 }

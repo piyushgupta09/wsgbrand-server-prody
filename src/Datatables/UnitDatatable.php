@@ -27,16 +27,16 @@ class UnitDatatable extends ModelDatatable
     {
         return array_merge(
             array(
-                'add_new' => [
+                'sync_new' => [
                     'show' => [
                         'active' => true,
                         'trash' => false,
                     ],
-                    'icon' => 'bi bi-plus-lg',
-                    'label' => 'Create',
+                    'icon' => 'bi bi-download',
+                    'label' => 'Sync',
                     'type' => 'buttons.action-link',
                     'style' => '',
-                    'route' => 'units.create',
+                    'route' => 'sync.units',
                     'function' => ''
                 ],
             ),

@@ -11,6 +11,10 @@
                 <livewire:product-measurements :modelId="$modelId" />
                 @break
 
+            @case('collections')
+                <livewire:product-collections :modelId="$modelId" />
+                @break
+
         @endswitch
     </div>
 </div>

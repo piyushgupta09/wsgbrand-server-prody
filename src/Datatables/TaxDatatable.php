@@ -27,19 +27,19 @@ class TaxDatatable extends ModelDatatable
     {
         return array_merge(
             array(
-                'add_new' => [
+                'sync_new' => [
                     'show' => [
                         'active' => true,
                         'trash' => false,
                     ],
-                    'icon' => 'bi bi-plus-lg',
-                    'label' => 'Create',
+                    'icon' => 'bi bi-download',
+                    'label' => 'Sync',
                     'type' => 'buttons.action-link',
                     'style' => '',
-                    'route' => 'taxes.create',
+                    'route' => 'sync.taxes',
                     'function' => ''
                 ],
-            ), 
+            ),
         );
     }
 
@@ -67,52 +67,6 @@ class TaxDatatable extends ModelDatatable
         return array_merge(
             parent::getDefaultPreColumns(),
             array(
-                'name' => [
-                    'name' => 'name',
-                    'labels' => [
-                        'table' => 'Name',
-                        'export' => 'Name'
-                    ],
-    
-                    'thead' => [
-                        'view' => 'buttons.sortit',
-                        'value' => '',
-                        'align' => '',
-                    ],
-                    'tbody' => [
-                        'view' => 'cells.text-value',
-                        'value' => 'getTableData',
-                        'align' => '',
-                    ],
-                    'viewable' => [
-                        'active' => true,
-                        'trash' => true
-                    ],
-                    'expandable' => [
-                        'active' => false,
-                        'trash' => false
-                    ],
-                    'sortable' => true,
-                    'filterable' => [
-                        'active' => true,
-                        'trash' => true
-                    ],
-                    'importable' => true,
-                    'exportable' => [
-                        'active' => true,
-                        'trash' => true,
-                        'value' => 'getTableData'
-                    ],
-                    'artificial' => false,
-                    'fillable' => [
-                        'type' => 'text',
-                        'style' => '',
-                        'placeholder' => 'Name',
-                        'component' => 'forms.input-box',
-                        'attributes' => ['required'],
-                        'rows' => ''
-                    ],
-                ],
                 'hsncode' => [
                     'name' => 'hsncode',
                     'labels' => [
@@ -202,6 +156,52 @@ class TaxDatatable extends ModelDatatable
                         'placeholder' => 'GST Rate',
                         'component' => 'forms.input-box',
                         'attributes' => ['required'],
+                        'rows' => ''
+                    ],
+                ],
+                'description' => [
+                    'name' => 'description',
+                    'labels' => [
+                        'table' => 'Description',
+                        'export' => 'Description'
+                    ],
+    
+                    'thead' => [
+                        'view' => 'buttons.sortit',
+                        'value' => '',
+                        'align' => '',
+                    ],
+                    'tbody' => [
+                        'view' => 'cells.text-value',
+                        'value' => 'getTableData',
+                        'align' => '',
+                    ],
+                    'viewable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'expandable' => [
+                        'active' => false,
+                        'trash' => false
+                    ],
+                    'sortable' => true,
+                    'filterable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'importable' => true,
+                    'exportable' => [
+                        'active' => true,
+                        'trash' => true,
+                        'value' => 'getTableData'
+                    ],
+                    'artificial' => false,
+                    'fillable' => [
+                        'type' => 'text',
+                        'style' => '',
+                        'placeholder' => 'Description',
+                        'component' => 'forms.input-box',
+                        'attributes' => [],
                         'rows' => ''
                     ],
                 ],

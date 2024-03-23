@@ -1,9 +1,9 @@
 <ul 
     id="{{ $sectionId }}" role="tablist"
     class="sectabs nav flex-column nav-pills border"
-    style="width: fit-content;">
+    style="width: 200px;">
     @foreach ($sections as $section)
-        <li class="nav-item" style="width: 150px;">
+        <li class="nav-item">
             <a class="nav-link fw-bold {{ $section['slug'] == $currentSection ? 'active' : '' }}"
                 href="{{ route('products.show', [
                     'product' => $model->slug, 

@@ -3,6 +3,13 @@
         <div class="d-flex align-items-center flex-fill">
             <span class="font-quick text-white ls-1 fw-bold">Product Actions</span>
         </div>
+
+        @if ($showProductDeleteBtn)
+            <button class="btn btn-light me-3" type="button" wire:click="deleteProduct">
+                Delete Product
+            </button>
+        @endif
+
         <div class="btn-group border border-secondary">
             @foreach ($productStatus as $status)    
                 <button 

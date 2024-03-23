@@ -63,6 +63,18 @@ class MaterialDatatable extends ModelDatatable
                     'route' => 'materials.create',
                     'function' => ''
                 ],
+                'sync_new' => [
+                    'show' => [
+                        'active' => true,
+                        'trash' => false,
+                    ],
+                    'icon' => 'bi bi-download',
+                    'label' => 'Sync',
+                    'type' => 'buttons.action-link',
+                    'style' => '',
+                    'route' => 'sync.materials',
+                    'function' => ''
+                ],
             ),
         );
     }

@@ -24,16 +24,23 @@ use Illuminate\Support\Facades\Log;
 use Fpaipl\Panel\Traits\ManageModel;
 use Fpaipl\Prody\Models\ProductUser;
 use Fpaipl\Prody\Models\ProductRange;
+use Fpaipl\Prody\Models\RefundPolicy;
+use Fpaipl\Prody\Models\ReturnPolicy;
 use Fpaipl\Prody\Models\ProductOption;
 use Fpaipl\Prody\Models\ProductProcess;
 use Illuminate\Database\Eloquent\Model;
 use Fpaipl\Prody\Models\ProductDecision;
+use Fpaipl\Prody\Models\ProductDiscount;
 use Fpaipl\Prody\Models\ProductMaterial;
 use Fpaipl\Prody\Models\ProductOverhead;
+use Fpaipl\Prody\Models\ProductStrategy;
 use Fpaipl\Prody\Models\ProductAttribute;
+use Fpaipl\Prody\Models\CollectionProduct;
 use Fpaipl\Prody\Models\ProductConsumable;
 use Fpaipl\Prody\Models\ProductMeasurement;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Fpaipl\Prody\Models\ProductRefundPolicy;
+use Fpaipl\Prody\Models\ProductReturnPolicy;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Fpaipl\Prody\Models\Category as ParentModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,7 +65,7 @@ class Product extends Model
         Authx,
         LogsActivity,
         ManageTag,
-        HasStatus,
+        // HasStatus,
         SoftDeletes,
         ManageModel;
 
@@ -76,23 +83,13 @@ class Product extends Model
         parent::boot();
 
         static::creating(function ($product) {
+            $product->uuid = Str::uuid();
             $product->slug = Str::slug($product->name . '-' . $product->code);
+            $product->sid = Str::slug($product->name . '-' . $product->brand->name . '-' . $product->category->name . '-' . $product->code);
         });
 
         static::created(function ($product) {
             $product->generateDecisions();
-            $product->addToRecommendedCollection();
-            $product->addToRangedCollection();
-        });
-
-        static::updated(function ($product) {
-            $product->addToRecommendedCollection();
-            $product->addToRangedCollection();
-        });
-
-        static::deleted(function ($product) {
-            $product->removeFromRecommendedCollection();
-            $product->removeFromRangedCollection();
         });
     }
 
@@ -103,9 +100,10 @@ class Product extends Model
 
     public function generateDecisions()
     {
-        ProductDecision::create([
-            'product_id' => $this->id,
-        ]);
+        ProductDecision::firstOrCreate(
+            ['product_id' => $this->id],
+            ['factory' => true, 'inbulk' => true]
+        );
     }
 
     public function scopeLive($query)
@@ -116,6 +114,13 @@ class Product extends Model
     public function scopeDraft($query)
     {
         return $query->where('status', 'draft');
+    }
+
+    public function scopeForwsg($query)
+    {
+        return $query->whereHas('productDecisions', function ($query) {
+            $query->where('inbulk', true);
+        });
     }
 
     /**
@@ -186,128 +191,58 @@ class Product extends Model
             return ParentModel::where('slug', Str::slug($row['category_name']))->first()->id;
         }
     }
-
-    /**
-     * Adds the product to a collection based on its ranged price.
-     * Also attaches the first product option to the collection.
-     *
-     * @return bool Returns true if the operation is successful, false otherwise
-     */
-    public function addToRangedCollection()
+    
+    public function addToCollection($collectionId): bool
     {
-        // Retrieve the first product range
-        $firstRange = $this->productRanges()->first();
-
-        // If there's no first product range, exit the function
-        if (!$firstRange) {
+        // Retrieve all product options IDs
+        $productOptionId = $this->productOptions->sortBy('id')->first()->id;
+        // $productOptionId = $this->productOptions->last()->id;
+        
+        // Check if there are any product options available
+        if (!$productOptionId) {
             return false;
         }
 
-        // Calculate the ranged price based on the first product range
-        $rangePrice = $firstRange->rate;
-        $rangedPrice = ceil($rangePrice / 100) * 100 - 1;
-        $rangedPrice = (int) $rangedPrice;
+        // Retrieve the collection with the given slug
+        $collection = Collection::where('slug', $collectionId)->first();
 
-        // Generate a slug for the collection based on the ranged price
-        $rangedCollectionSlug = 'under-' . $rangedPrice;
-
-        // Look for an existing collection with that slug
-        $collection = Collection::where('slug', $rangedCollectionSlug)->first();
-
-        // Retrieve the ID of the first product option if it exists
-        $firstProductOptionId = optional($this->productOptions()->first())->id;
-
-        // If there's no first product option, exit the function
-        if (!$firstProductOptionId) {
-            return false;
-        }
-
-        // If the collection already exists
-        if ($collection) {
+        // If the collection exists
+        if ($collection->exists()) {
             // Check if the product is already in the collection
-            if (!$collection->products->contains($this->id)) {
-                // Attach the product and its first product option to the collection
-                $collection->products()->attach($this->id, ['product_option_id' => $firstProductOptionId]);
+            if (!$collection->collectionProducts->pluck('product_id')->contains($this->id)) {
+                // Attach the product and its random product option to the collection
+                $collection->products()->attach($this->id, [
+                    'wsg_collection_id' => $collection->wsg_id,
+                    'product_option_id' => $productOptionId
+                ]);
             }
-            return true;
-        } else {
-            // Create a new collection if it doesn't exist
-            $index = Collection::count();
-            $collection = Collection::create([
-                'name' => 'Under ' . $rangedPrice,
-                'type' => 'ranged',
-                'order' => $index + 1,
-                'info' => 'This collection contains products with price under ' . $rangedPrice . '.',
-            ]);
 
-            // Attach the product and its first product option to the new collection
-            $collection->products()->attach($this->id, ['product_option_id' => $firstProductOptionId]);
-
-            // Assuming $this->productOptions() returns a collection of ProductOption models
-            $productOption = $this->productOptions()->first();
-
-            if ($productOption && $productOption->hasMedia(Collection::MEDIA_COLLECTION_NAME)) {
-                $mediaUrl = $productOption->getFirstMediaUrl(Collection::MEDIA_COLLECTION_NAME);
-
-                // Assuming $collection is the instance where you want to add media
-                $collection->addMediaFromUrl($mediaUrl)->toMediaCollection(Collection::MEDIA_COLLECTION_NAME);
+            // check if the product is in the collection
+            if ($collection->products->contains($this->id)) {
+                return true;
             }
-            return true;
         }
+
+        return false;
     }
 
-    /**
-     * Removes the product from a collection based on its ranged price.
-     *
-     * @return bool Returns true if the operation is successful, false otherwise
-     */
-    public function removeFromRangedCollection()
-    {
-        $productCollection = $this->collections()->where('type', 'ranged')->get();
-        foreach ($productCollection as $collection) {
-            $collection->products()->detach($this->id);
-        }
-        return true;
-    }
-
-    public function addToRecommendedCollection()
+    public function removeFromCollection($collectionId): bool
     {
         // Look for an existing collection with that slug
-        $collection = Collection::where('slug', 'recommended')->first();
-
-        // Retrieve the ID of the first product option if it exists
-        $firstProductOptionId = optional($this->productOptions()->first())->id;
-
-        // If there's no first product option, exit the function
-        if (!$firstProductOptionId) {
-            return false;
-        }
-
-        // If the collection already exists
-        if ($collection) {
-            // Check if the product is already in the collection
-            if (!$collection->products->contains($this->id)) {
-                // Attach the product and its first product option to the collection
-                $collection->products()->attach($this->id, ['product_option_id' => $firstProductOptionId]);
-            }
-            return true;
-        }
-    }
-
-    public function removeFromRecommendedCollection()
-    {
-        // Look for an existing collection with that slug
-        $collection = Collection::where('slug', 'recommended')->first();
-
+        $collection = Collection::where('slug', $collectionId)->first();
+        
         // If the collection already exists
         if ($collection) {
             // Check if the product is already in the collection
             if ($collection->products->contains($this->id)) {
                 // Detach the product and its first product option to the collection
                 $collection->products()->detach($this->id);
+                // Return true if the product was successfully removed from the collection
+                return true;
             }
-            return true;
         }
+
+        return false;
     }
 
     public function getBase64Image()
@@ -385,6 +320,58 @@ class Product extends Model
         return $this->hasMany(ProductOption::class);
     }
 
+    public function productStrategies(): HasMany
+    {
+        return $this->hasMany(ProductStrategy::class);
+    }
+
+    public function productDiscounts(): HasMany
+    {
+        return $this->hasMany(ProductDiscount::class);
+    }
+
+    /**
+     * Get all of the refund policies for the product.
+     */
+    public function refundPolicies()
+    {
+        return $this->belongsToMany(RefundPolicy::class, 'product_refund_policy')
+                    ->withPivot('decision')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get all of the return policies for the product.
+     */
+    public function returnPolicies()
+    {
+        return $this->belongsToMany(ReturnPolicy::class, 'product_return_policy')
+                    ->withPivot('decision')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get refund policies for a specific decision.
+     *
+     * @param  string $decision The decision type.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function refundPoliciesByDecision($decision)
+    {
+        return $this->refundPolicies()->wherePivot('decision', $decision);
+    }
+
+    /**
+     * Get return policies for a specific decision.
+     *
+     * @param  string $decision The decision type.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function returnPoliciesByDecision($decision)
+    {
+        return $this->returnPolicies()->wherePivot('decision', $decision);
+    }
+
     /**
      * Define the relationship between the Product and ProductRange models.
      * 
@@ -400,14 +387,16 @@ class Product extends Model
         return $this->hasMany(Ledger::class);
     }
 
-    /**
-     * Define the relationship between the Product and Collection models.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function collections(): BelongsToMany
+    public function collections()
     {
-        return $this->belongsToMany(Collection::class, 'collection_product');
+        return $this->belongsToMany(Collection::class, 'collection_product')
+                    ->withPivot('product_option_id')
+                    ->withTimestamps();
+    }
+
+    public function productCollections(): HasMany
+    {
+        return $this->hasMany(CollectionProduct::class);
     }
 
     public function productProcesses(): HasMany
@@ -542,7 +531,7 @@ class Product extends Model
         if ($this->productOptions()->count() == 0) {
             return config('app.url') . '/storage/assets/placeholders/product_100.webp';
         }
-        return $this->productOptions()?->first()?->getImage($conversion);
+        return $this->productOptions->sortBy('id')?->first()?->getImage($conversion);
     }
 
     public function stock()
@@ -609,6 +598,8 @@ class Product extends Model
     public function getTableData($key)
     {
         switch ($key) {
+            case 'decision':
+                return $this->getProductDecision();
             case 'brand':
                 return $this->brand->name;
             case 'category_id': 
@@ -623,6 +614,20 @@ class Product extends Model
             default:
                 return $this->{$key};
         }
+    }
+
+    public function getProductDecision()
+    {
+        $decision = '';
+        $decision .= $this->productDecisions->factory ? 'Factory' : '';
+        $decision .= $this->productDecisions->vendor ? 'Vendor' : '';
+        $decision .= $this->productDecisions->market ? 'Market' : '';
+        $decision .= ' | ';
+        $decision .= $this->productDecisions->ecomm ? 'ECOM' : '';
+        $decision .= $this->productDecisions->retail ? ' RTR' : '';
+        $decision .= $this->productDecisions->inbulk ? ' WSG' : '';
+        $decision .= $this->productDecisions->pos ? ' POS' : '';
+        return $decision;
     }
 
     // public function inCart(){
@@ -752,12 +757,12 @@ class Product extends Model
                     $tags[] = $newStockItem->product_range_name;
                     $searchtags[] = $newStockItem->product_option_name;
                     $searchtags[] = $newStockItem->product_range_name;
-                    $tags = array_unique($tags);
-                    $newStockItem->tags = implode(', ', $tags);
+                    $tagsString = implode(', ', array_unique($tags));
+                    $newStockItem->tags = substr($tagsString, 0, 220);
                     $newStockItem->save();
                 }
             }
-
+            
             $newStock->tags = implode(', ', array_unique($searchtags));
             $newStock->save();
 
@@ -832,8 +837,8 @@ class Product extends Model
                 throw new \Exception('Product cannot be deleted if it is live.');
             }
 
-            if ($stock) {
-                throw new \Exception('Product cannot be deleted if it has stock.');
+            if ($this->productMaterials()->count() > 0) {
+                throw new \Exception('Product cannot be deleted if it has product materials.');
             }
 
             if ($this->productOptions()->count() > 0) {
@@ -844,52 +849,28 @@ class Product extends Model
                 throw new \Exception('Product cannot be deleted if it has product ranges.');
             }
 
-            if ($this->productMaterials()->count() > 0) {
-                throw new \Exception('Product cannot be deleted if it has product materials.');
+            if ($stock) {
+                throw new \Exception('Product cannot be deleted if it has stock.');
             }
 
-            if ($this->productProcesses()->count() > 0) {
-                throw new \Exception('Product cannot be deleted if it has product processes.');
+            if ($this->productAttributes()->count() > 0) {
+                throw new \Exception('Product cannot be deleted if it has product attributes.');
             }
 
-            if ($this->pos()->count() > 0) {
-                throw new \Exception('Product cannot be deleted if it has POs.');
+            if ($this->productMeasurements()->count() > 0) {
+                throw new \Exception('Product cannot be deleted if it has product measurements.');
             }
 
-            // Delete related product processes
-            $productProcesses = ProductProcess::where('product_id', $this->id)->get();
-            foreach ($productProcesses as $productProcess) {
-                $productProcess->forceDelete();
+            if ($this->productCollections()->count() > 0) {
+                throw new \Exception('Product cannot be deleted if it has product collections.');
             }
 
-            // Delete related product overheads
-            $productOverheads = ProductOverhead::where('product_id', $this->id)->get();
-            foreach ($productOverheads as $productOverhead) {
-                $productOverhead->forceDelete();
+            if ($this->overheads()->count() > 0) {
+                throw new \Exception('Product cannot be deleted if it has overheads.');
             }
 
-            // Delete related product users
-            $productUsers = ProductUser::where('product_id', $this->id)->get();
-            foreach ($productUsers as $productUser) {
-                $productUser->forceDelete();
-            }
-
-            // Delete related product materials
-            $productMaterials = ProductMaterial::where('product_id', $this->id)->get();
-            foreach ($productMaterials as $productMaterial) {
-                $productMaterial->forceDelete();
-            }
-
-            // Delete related product options
-            $productOptions = ProductOption::where('product_id', $this->id)->get();
-            foreach ($productOptions as $productOption) {
-                $productOption->forceDelete();
-            }
-
-            // Delete related product ranges
-            $productRanges = ProductRange::where('product_id', $this->id)->get();
-            foreach ($productRanges as $productRange) {
-                $productRange->forceDelete();
+            if ($this->consumables()->count() > 0) {
+                throw new \Exception('Product cannot be deleted if it has consumables.');
             }
 
             // Delete the product
@@ -911,14 +892,181 @@ class Product extends Model
             ->useLogName('model_log');
     }
 
-    public function overheads()
-    {
-        return $this->belongsToMany(Overhead::class, 'product_overhead')->withPivot('cost', 'ratio', 'reasons');
-    }
+    // TO BE DELETED
+    // public function overheads()
+    // {
+    //     return $this->belongsToMany(Overhead::class, 'product_overhead')->withPivot('cost', 'ratio', 'reasons');
+    // }
 
     // Products have many consumables
     public function consumables()
     {
         return $this->belongsToMany(Consumable::class, 'product_consumable')->withPivot('quantity', 'cost', 'reasons');
     }
+
+    public function duplicateRelations($product)
+    {
+        // $this->duplicateProductMaterials();
+        // $this->duplicateProductOptions();
+        // $this->duplicateProductRanges();
+        // $this->duplicateProductCollections($product);
+
+        $this->duplicateProductAttributes($product);
+        $this->duplicateProductMeasurements($product);
+        $this->duplicateProductDecisions($product);
+        $this->duplicateProductStrategy($product);
+        $this->duplicateOverheads($product);
+        $this->duplicateConsumables($product);
+    }
+
+    // private function duplicateProductMaterials()
+    // {
+    //     $productMaterials = $this->productMaterials;
+    //     if ($productMaterials->isEmpty()) {
+    //         return;
+    //     }
+    //     foreach ($productMaterials as $productMaterial) {
+    //         $newProductMaterial = $productMaterial->replicate();
+    //         $newProductMaterial->product_id = $this->id;
+    //         $newProductMaterial->save();
+    //     }
+    // }
+
+    // private function duplicateProductOptions()
+    // {
+    //     $productOptions = $this->productOptions;
+    //     if ($productOptions->isEmpty()) {
+    //         return;
+    //     }
+    //     foreach ($productOptions as $productOption) {
+    //         $newProductOption = $productOption->replicate();
+    //         $newProductOption->product_id = $this->id;
+    //         $newProductOption->save();
+    //         $productOption->duplicateMedia($newProductOption);
+    //     }
+    // }
+
+    // private function duplicateProductRanges()
+    // {
+    //     $productRanges = $this->productRanges;
+    //     if ($productRanges->isEmpty()) {
+    //         return;
+    //     }
+    //     foreach ($productRanges as $productRange) {
+    //         $newProductRange = $productRange->replicate();
+    //         $newProductRange->product_id = $this->id;
+    //         $newProductRange->save();
+    //     }
+    // }
+
+    // private function duplicateProductCollections($product)
+    // {
+    //     $productCollections = $this->productCollections;
+    //     if ($productCollections->isEmpty()) {
+    //         return;
+    //     }
+    //     foreach ($productCollections as $productCollection) {
+    //         $newProductCollection = $productCollection->replicate();
+    //         $newProductCollection->product_id = $product->id;
+    //         $newProductCollection->save();
+    //     }
+    // }
+
+    private function duplicateProductAttributes($product)
+    {
+        $productAttributes = $this->productAttributes;
+        if ($productAttributes->isEmpty()) {
+            return;
+        }
+        foreach ($productAttributes as $productAttribute) {
+            $newProductAttribute = $productAttribute->replicate();
+            $newProductAttribute->product_id = $product->id;
+            $newProductAttribute->save();
+        }
+    }
+
+    private function duplicateProductMeasurements($product)
+    {
+        $productMeasurements = $this->productMeasurements;
+        if ($productMeasurements->isEmpty()) {
+            return;
+        }
+        foreach ($productMeasurements as $productMeasurement) {
+            $newProductMeasurement = $productMeasurement->replicate();
+            $newProductMeasurement->product_id = $product->id;
+            $newProductMeasurement->save();
+        }
+    }
+
+    private function duplicateProductDecisions($product)
+    {
+        $product->productDecisions->factory = $this->productDecisions->factory;
+        $product->productDecisions->vendor = $this->productDecisions->vendor;
+        $product->productDecisions->market = $this->productDecisions->market;
+        $product->productDecisions->ecomm = $this->productDecisions->ecomm;
+        $product->productDecisions->retail = $this->productDecisions->retail;
+        $product->productDecisions->inbulk = $this->productDecisions->inbulk;
+        $product->productDecisions->pos = $this->productDecisions->pos;
+        $product->productDecisions->pay_cod = $this->productDecisions->pay_cod;
+        $product->productDecisions->pay_part = $this->productDecisions->pay_part;
+        $product->productDecisions->pay_half = $this->productDecisions->pay_half;
+        $product->productDecisions->pay_full = $this->productDecisions->pay_full;
+        $product->productDecisions->del_pick = $this->productDecisions->del_pick;
+        $product->productDecisions->del_free = $this->productDecisions->del_free;
+        $product->productDecisions->del_paid = $this->productDecisions->del_paid;
+        $product->productDecisions->locked = $this->productDecisions->locked;
+        $product->productDecisions->cost_locked = $this->productDecisions->cost_locked;
+        $product->productDecisions->update();
+    }
+
+    private function duplicateOverheads($product)
+    {
+        $productOverheads = $this->productOverheads;
+        if ($productOverheads->isEmpty()) {
+            return;
+        }
+    
+        foreach ($productOverheads as $overhead) {
+
+            // Duplicate the overhead
+            $newOverhead = $overhead->replicate(['product_id']);
+
+            // Set the new product ID to associate with the duplicated overhead.
+            $newOverhead->product_id = $product->id;
+    
+            // Calculate amount for the new overhead if necessary.
+            // This is based on the 'store' method logic you provided.
+            $newOverhead->amount = $newOverhead->ratio * $newOverhead->rate;
+    
+            // If there are other fields that need to be recalculated or reassigned, do it before saving.
+            $newOverhead->save();
+        }
+    }
+    
+    private function duplicateConsumables($product)
+    {
+        $consumables = $this->productConsumables; // Assuming this is the correct method to load consumables
+        if ($consumables->isEmpty()) {
+            return;
+        }
+        foreach ($consumables as $consumable) {
+            $newConsumable = $consumable->replicate(['product_id']);
+            $newConsumable->product_id = $product->id;
+            $newConsumable->save();
+        }
+    }
+
+    private function duplicateProductStrategy($product)
+    {
+        $productStrategies = $this->productStrategies;
+        if ($productStrategies->isEmpty()) {
+            return;
+        }
+        foreach ($productStrategies as $productStrategy) {
+            $newProductStrategy = $productStrategy->replicate();
+            $newProductStrategy->product_id = $product->id;
+            $newProductStrategy->save();
+        }
+    }
+    
 }

@@ -84,6 +84,7 @@ class Supplier extends Model implements HasMedia
         switch ($key) {
             case 'sid': return $this->sid;
             case 'type': return self::TYPES[$this->type];
+            case 'materials': return $this->materials->count();
             default: return $this->key;
         }
     }

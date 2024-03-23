@@ -57,7 +57,12 @@ class ProductPartyLedger extends Component
             $this->fab_rate = 20;
             $this->parties = Party::where('type', Party::PRODUCT_FATORY)->active()->get();
         } else if ($this->model->productDecisions->vendor) {
-            $this->fab_rate = $this->model->productRanges->first()->cost;
+            $productRanges = $this->model->productRanges->first();
+            if ($productRanges) {
+                $this->fab_rate = $productRanges->cost;
+            } else {
+                $this->fab_rate = 0;
+            }
             $this->parties = Party::where('type', Party::PRODUCT_VENDOR)->active()->get();
         } else {
             $this->parties = collect();

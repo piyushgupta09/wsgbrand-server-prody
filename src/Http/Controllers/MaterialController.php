@@ -18,6 +18,7 @@ class MaterialController extends PanelController
     public function store(MaterialRequest $request)
     {
         $material = Material::create($request->validated());
+        $material->update(['name' => $material->category_name . '-' . $material->name]);
         if (isset($material)) {
             return redirect()->route('materials.index')->with('toast', [
                 'class' => 'success',

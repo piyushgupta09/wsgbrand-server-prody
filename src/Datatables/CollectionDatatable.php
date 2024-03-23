@@ -48,16 +48,16 @@ class CollectionDatatable extends ModelDatatable
     {
         return array_merge(
             array(
-                'add_new' => [
+                'sync_new' => [
                     'show' => [
                         'active' => true,
                         'trash' => false,
                     ],
-                    'icon' => 'bi bi-plus-lg',
-                    'label' => 'Create',
+                    'icon' => 'bi bi-download',
+                    'label' => 'Sync',
                     'type' => 'buttons.action-link',
                     'style' => '',
-                    'route' => 'collections.create',
+                    'route' => 'sync.collections',
                     'function' => ''
                 ],
             ),
@@ -337,11 +337,48 @@ class CollectionDatatable extends ModelDatatable
                         'rows' => ''
                     ],
                 ],
+                'image' => [
+                    'name' => 'image',
+                    'labels' => [
+                        'table' => 'Image',
+                        'export' => 'Image'
+                    ],
+    
+                    'thead' => [
+                        'view' => 'buttons.sortit',
+                        'value' => '',
+                        'align' => '',
+                    ],
+                    'tbody' => [
+                        'view' => 'cells.image-value',
+                        'value' => 'getTableData',
+                        'align' => '',
+                    ],
+                    'viewable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'expandable' => [
+                        'active' => false,
+                        'trash' => false
+                    ],
+                    'sortable' => true,
+                    'filterable' => [
+                        'active' => true,
+                        'trash' => true
+                    ],
+                    'importable' => true,
+                    'exportable' => [
+                        'active' => true,
+                        'trash' => true,
+                        'value' => 'getTableData'
+                    ],
+                    'artificial' => true,
+                    'fillable' => [],
+                ],
             ),
-            parent::getDefaultImagesColumn(),
             parent::getDefaultSlugColumns(),
             parent::getDefaultPostColumns(),
         );
     }
-
 }

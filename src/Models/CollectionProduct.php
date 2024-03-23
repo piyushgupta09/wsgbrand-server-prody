@@ -15,6 +15,7 @@ class CollectionProduct extends Model
     protected $table = 'collection_product';
 
     protected $fillable = [
+        'wsg_collection_id',
         'collection_id',
         'product_id',
         'product_option_id',

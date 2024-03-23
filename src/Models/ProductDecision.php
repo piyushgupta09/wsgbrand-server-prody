@@ -21,7 +21,7 @@ class ProductDecision extends Model
         'ecomm',
         'retail',
         'inbulk',
-        'offline',
+        'pos',
         'pay_cod',
         'pay_online',
         'pick_up',

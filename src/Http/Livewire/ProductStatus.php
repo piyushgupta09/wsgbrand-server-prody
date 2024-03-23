@@ -12,11 +12,16 @@ class ProductStatus extends Component
 {
     public $productStatus;
     public $product;
+    public $showProductDeleteBtn;
 
     public function mount($modelId)
     {
         $this->productStatus = Product::STATUS;
         $this->product = Product::find($modelId);
+
+        /** @var User $authUser */
+        $authUser = auth()->user();
+        $this->showProductDeleteBtn = $authUser->isSuperAdmin();
     }
 
     /**
@@ -41,6 +46,7 @@ class ProductStatus extends Component
         // Making product Live
         if ($status == Product::STATUS[1]) {
             try {
+
                 // Ensure product has options and ranges
                 if ($this->product->productOptions->isEmpty() || $this->product->productRanges->isEmpty()) {
                     throw new \Exception('Product has no product options or ranges.');
@@ -55,8 +61,12 @@ class ProductStatus extends Component
                 }
 
                 // Add product to collections and update status
-                $this->product->addToRangedCollection();
-                $this->product->addToRecommendedCollection();
+                $addedToRecommendedCollection = $this->product->addToCollection('recommended');
+                
+                if (!$addedToRecommendedCollection) {
+                    throw new \Exception('Failed to add product to collections.');
+                }
+
                 $this->product->status = $status;
                 $this->product->save();
 
@@ -64,6 +74,7 @@ class ProductStatus extends Component
                     'class' => 'success',
                     'text' => 'Product is Live Now.',
                 ]);
+
             } catch (\Throwable $th) {
                 // Handle exceptions
                 return redirect()->route('products.show', $this->product->slug)->with('toast', [
@@ -72,12 +83,16 @@ class ProductStatus extends Component
                 ]);
             }
 
-            // Making product Draft
-        } elseif ($status == Product::STATUS[0]) {
+        // Making product Draft
+        } else if ($status == Product::STATUS[0]) {
             try {
                 // Remove product from collections and update status
-                $this->product->removeFromRangedCollection();
-                $this->product->removeFromRecommendedCollection();
+                $removedFromRecommendedCollection = $this->product->removeFromCollection('recommended');
+                
+                if (!$removedFromRecommendedCollection) {
+                    throw new \Exception('Failed to remove product from collections.');
+                }
+
                 $this->product->status = $status;
                 $this->product->save();
 
