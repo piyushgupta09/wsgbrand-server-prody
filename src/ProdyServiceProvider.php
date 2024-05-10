@@ -11,16 +11,17 @@ use Fpaipl\Prody\Http\Livewire\MaterialRanges;
 use Fpaipl\Prody\Http\Livewire\ProductDetails;
 use Fpaipl\Prody\Http\Livewire\ProductOptions;
 use Fpaipl\Prody\Http\Livewire\ProductPricing;
+use Fpaipl\Prody\Console\Commands\SeedProducts;
 use Fpaipl\Prody\Http\Livewire\MaterialOptions;
 use Fpaipl\Prody\Http\Livewire\ProductSections;
 use Fpaipl\Prody\Http\Livewire\ProductCostsheet;
 use Fpaipl\Prody\Http\Livewire\ProductDecisions;
 use Fpaipl\Prody\Http\Livewire\ProductMaterials;
 use Fpaipl\Prody\Http\Livewire\ProductOverheads;
-use Fpaipl\Prody\Http\Livewire\ProductStrategies;
 use Fpaipl\Prody\Http\Livewire\ProductProcesses;
 use Fpaipl\Prody\Http\Livewire\ProductAttributes;
 use Fpaipl\Prody\Http\Livewire\ProductFixedcosts;
+use Fpaipl\Prody\Http\Livewire\ProductStrategies;
 use Fpaipl\Prody\Http\Livewire\ProductCollections;
 use Fpaipl\Prody\Http\Livewire\ProductConsumables;
 use Fpaipl\Prody\Http\Livewire\ProductPartyLedger;
@@ -36,7 +37,11 @@ class ProdyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                SeedProducts::class,
+            ]);
+        }
     }
 
     /**

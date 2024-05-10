@@ -134,23 +134,21 @@ class Product extends Model
      * @var array
      */
     protected $fillable = [
-        'status',        // The status of the product
-        'brand_id',      // The ID of the associated brand
-        'category_id',   // The ID of the associated category
-        'tax_id',        // The ID of the associated tax class
-        'name',          // The name of the product
-        'code',          // The product's unique code or SKU
-        'details',       // Detailed information about the product
-        'moq',           // Minimum order quantity for the product
-        // Desicion making
-        'ecomm', // Sell online ecomm store
-        'retail', // Sell on retailpur
-        'inbulk', // Sell on wholesaleGuruji
-        'offline', // Sell offline dukaan
-        'vendor', // Buy from vendor (as per customer order)
-        'factory', // Buy from factory (as per self order)
-        'market', // Buy from market (as per self decision)
-        'decision_locked', // Decision locked
+        'sid',
+        'uuid',
+        'name',
+        'slug',
+        'code',
+        'details',
+        'brand_id',
+        'category_id',
+        'tax_id',
+        'mrp',
+        'rate',
+        'moq',
+        'status',
+        'active',
+        'tags',
     ];
 
     /**
@@ -230,20 +228,34 @@ class Product extends Model
     {
         // Look for an existing collection with that slug
         $collection = Collection::where('slug', $collectionId)->first();
-        
-        // If the collection already exists
-        if ($collection) {
-            // Check if the product is already in the collection
-            if ($collection->products->contains($this->id)) {
-                // Detach the product and its first product option to the collection
-                $collection->products()->detach($this->id);
-                // Return true if the product was successfully removed from the collection
-                return true;
-            }
+    
+        // If the collection does not exist, return true since there is nothing to remove
+        if (!$collection) {
+            return true;
         }
-
-        return false;
+    
+        // Check if the product is in the collection
+        if (!$collection->products->contains($this->id)) {
+            // If the product is not in the collection, return true because there is no error
+            // in the requirement of removing it (it's simply not there to begin with)
+            return true;
+        }
+    
+        try {
+            // Detach the product from the collection
+            $collection->products()->detach($this->id);
+    
+            // Return true if the product was successfully removed
+            return true;
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error removing product from collection: ' . $e->getMessage());
+            
+            // Return false if an error occurred during the deletion process
+            return false;
+        }
     }
+    
 
     public function getBase64Image()
     {
@@ -865,11 +877,11 @@ class Product extends Model
                 throw new \Exception('Product cannot be deleted if it has product collections.');
             }
 
-            if ($this->overheads()->count() > 0) {
+            if ($this->productOverheads()->count() > 0) {
                 throw new \Exception('Product cannot be deleted if it has overheads.');
             }
 
-            if ($this->consumables()->count() > 0) {
+            if ($this->productConsumables()->count() > 0) {
                 throw new \Exception('Product cannot be deleted if it has consumables.');
             }
 

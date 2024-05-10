@@ -93,7 +93,7 @@
             {{-- Select Material Unit --}}
             <div class="col-md-6 mb-3">
                 <div class="form-floating">
-                    <input type="text" id="productMaterialUnit" class="form-control" wire:model.lazy="materialUnit" disabled>
+                    <input type="text" id="productMaterialUnit" class="form-control" wire:model.lazy="materialUnit">
                     <label for="productMaterialUnit" class="font-quick text-dark font-normal">Material Unit</label>            
                     @error('materialUnit')
                         <span style="font-size: 0.75rem" class="text-bg-danger error">{{ $message }}</span>

@@ -87,6 +87,14 @@ class ProductOption extends Model implements HasMedia
             ->addMediaCollection($this->getMediaCollectionName())
             ->useFallbackUrl(config('app.url') . '/storage/assets/images/placeholder.jpg')
             ->useFallbackPath(public_path('storage/assets/images/placeholder.jpg'));
+
+
+            // $productOption->addMedia($path)
+            //   ->preservingOriginal()
+            //   ->withResponsiveImages()
+            //   ->manipulations(['*' => ['crop' => '3:4']])
+            //   ->toMediaCollection(ProductOption::MEDIA_COLLECTION_NAME);
+
     }
 
     public function registerMediaConversions(Media $media = null): void

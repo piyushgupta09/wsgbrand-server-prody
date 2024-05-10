@@ -24,7 +24,8 @@ class ProductCollections extends Component
         $this->product = Product::find($modelId);
         $this->productOptions = $this->product->productOptions;
         $this->collections = Collection::active()->get();
-        $this->selectedProductOption = $this->productOptions?->first()->id;
+        $firstProductOption = $this->productOptions?->first();
+        $this->selectedProductOption = $firstProductOption?->id;
         $this->productCollections = $this->product->collections;
         $this->routeValue = [
             'product' => $this->product->slug, 
